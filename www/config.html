@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>config</title>
+</head>
+<body>
+<button onclick="location.reload()">Scan WIFI</button>
+<br><br>
+<form method="post" name="f1" action="postwifi">
+    SSID:<br>
+    <input list="ssids" name="ssid" placeholder="WIFI名称" required>
+    <datalist id="ssids">
+        <!--       <option value="none">-->
+    </datalist>
+    <br><br>
+    Password:<br>
+    <input type="password" name="pwd" placeholder="WIFI密码" required>
+    <br><br>
+    <input type="submit" value="Submit">
+    <br>
+</form>
+<br><br>
+<form method="post" name="f2" action="posthost">
+    Host:<br>
+    <input name="Host" placeholder="服务器域名或IP" required>
+    <br><br>
+    Port:<br>
+    <input name="Port" type="number" min="1" max="65535" placeholder="服务器端口" required>
+    <br><br>
+    <input type="submit" value="Submit">
+    <br>
+</form>
+</body>
+</html>

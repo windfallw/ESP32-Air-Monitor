@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <title>ESP32-Air-Monitor</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="../src/font.css" rel="stylesheet">
+    <link href="../src/ubuntuMono.css" rel="stylesheet">
+    <!-- Custom styles for this template-->
+    <link href="../src/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="iconfont icon-setting"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">ESP32控制台</div>
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item">
+            <a class="nav-link" href="#" id="board">
+                <i class="iconfont icon-yibiaopan"></i>
+                <span>监控面板</span></a>
+        </li>
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+        <!-- Nav Item - Charts -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" id="table">
+                <i class="iconfont icon-table"></i>
+                <span>图表</span>
+            </a>
+        </li>
+        <!-- Nav Item - setting -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" id="setting">
+                <i class="iconfont icon-shezhi"></i>
+                <span>设置</span>
+            </a>
+        </li>
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+        <!-- Nav Item - Pages -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
+               aria-expanded="true" aria-controls="collapsePages">
+                <i class="iconfont icon-folder"></i>
+                <span>Pages</span>
+            </a>
+            <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">备用网页:</h6>
+                    <a class="collapse-item" href="config.html">config.html</a>
+                    <a class="collapse-item" href="#">404.html</a>
+                </div>
+            </div>
+        </li>
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block">
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                <!-- Sidebar Toggle (Topbar) -->
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3"
+                        style="text-decoration:none;">
+                    <i class="iconfont icon-bar"></i>
+                </button>
+
+                <!-- Topbar Navbar -->
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item no-arrow">
+                        <a class="nav-link" href="#">
+                            <i class="iconfont icon-cpu-temper text-gray-600"></i>
+                            <span class="ml-2 d-lg-inline text-gray-600 small" id="cpuTemper">读取中</span>
+                        </a>
+                    </li>
+                    <li class="nav-item no-arrow">
+                        <a class="nav-link" href="#">
+                            <i class="iconfont icon-hall text-gray-600"></i>
+                            <span class="ml-2 d-lg-inline text-gray-600 small" id="Hall">读取中</span>
+                        </a>
+                    </li>
+
+                    <div class="topbar-divider d-sm-block"></div>
+
+                    <!-- Nav Item - WiFi Information -->
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="wifiDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="essid">读取中</span>
+                            <i class="iconfont icon-wifi-disabled text-gray-600" id="wifiIcon"></i>
+                        </a>
+
+                        <!-- Dropdown - WiFi Information -->
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                             aria-labelledby="wifiDropdown">
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#stationModal">
+                                <i class="iconfont icon-station  mr-2 text-gray-600"></i>
+                                Station
+                            </a>
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#apModal">
+                                <i class="iconfont icon-ap  mr-2 text-gray-600"></i>
+                                Access Point
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#resetModal">
+                                <i class="iconfont icon-chongqi mr-2 text-gray-600"></i>
+                                重启
+                            </a>
+                        </div>
+                    </li>
+
+                </ul>
+
+            </nav>
+            <!-- End of Topbar -->
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0 text-gray-800" id="heading">监控面板</h1>
+                </div>
+
+                <!-- Content Row -->
+                <div class="row">
+
+                    <!-- CPU Card -->
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            CPU工作频率
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="freq">读取中......</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="iconfont icon-cpu text-gray-200" style="font-size: 32px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RAM Card -->
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1"
+                                             id="ramText">
+                                            内存使用情况
+                                        </div>
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col-auto">
+                                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"
+                                                     id="ramPercent">读取中
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="progress progress-sm mr-2">
+                                                    <div class="progress-bar bg-info progress-bar-striped progress-bar-animated"
+                                                         role="progressbar"
+                                                         style="width: 0" aria-valuenow="0" aria-valuemin="0"
+                                                         aria-valuemax="100" id="ramProgress"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="iconfont icon-neicun text-gray-200" style="font-size: 32px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UART Card -->
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">串口处理成功次数
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="uartCount">读取中......
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="iconfont icon-chuankou text-gray-300" style="font-size: 32px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HTTP num Card  -->
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            HTTP请求成功次数
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="httpCount">读取中......
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="iconfont icon-http text-gray-300" style="font-size: 32px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Row -->
+
+                <!-- Board Row 1-->
+                <div class="row" id="boardRow1">
+
+                    <!-- Air Chart -->
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Dropdown -->
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">PMS7003M</h6>
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink1"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                       style="text-decoration:none;">
+                                        <i class="iconfont icon-ellipsis text-gray-400"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                         aria-labelledby="dropdownMenuLink1">
+                                        <div class="dropdown-header">图表设置</div>
+                                        <button class="dropdown-item" onclick="switchAreaChart(0);">PM1.0浓度</button>
+                                        <button class="dropdown-item" onclick="switchAreaChart(1);">PM2.5浓度</button>
+                                        <button class="dropdown-item" onclick="switchAreaChart(2);">PM10浓度</button>
+                                        <div class="dropdown-divider"></div>
+                                        <button class="dropdown-item" onclick="switchAreaChart(3);">空气中颗粒物</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="card-body">
+                                <div class="chart-area">
+                                    <canvas id="AreaChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DHT11 Pie -->
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Dropdown -->
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">DHT11</h6>
+                            </div>
+                            <!-- Card Body -->
+                            <div class="card-body">
+                                <div class="chart-pie pt-4 pb-2">
+                                    <canvas id="PieChart"></canvas>
+                                </div>
+                                <div class="mt-4 text-center small">
+                                    <span class="mr-2">
+                                        <i class="iconfont icon-shidu text-info" id="humidity">湿度</i>
+                                    </span>
+                                    <span class="mr-2">
+                                        <i class="iconfont icon-wendu text-danger" id="temper">温度</i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Board Row 1-->
+
+                <!-- Board Row 2-->
+                <div class="row" id="boardRow2">
+
+                    <!-- Content Column -->
+                    <div class="col-lg-6 mb-4">
+
+                        <!-- Map Card -->
+                        <div class="card shadow mb-4">
+
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">GPS Map</h6>
+
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink2"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="iconfont icon-map text-gray-500"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                         aria-labelledby="dropdownMenuLink2">
+                                        <div class="dropdown-header">GPS设置</div>
+                                        <button class="dropdown-item" onclick="getGps();">定位一次</button>
+                                        <div class="dropdown-divider"></div>
+                                        <button class="dropdown-item" onclick="closeAutoGetGps();">关闭自动定位</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="card-body">
+                                <div class="chart-area" id="Map"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-6 mb-4">
+
+                        <!-- VOC Card -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">VOC Module</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-bar">
+                                    <canvas id="BarChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Board Row 2-->
+
+                <!-- Setting Row 1-->
+                <div class="row" id="settingRow1">
+
+                    <div class="col-lg-4">
+                        <!-- WiFi Connect -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">连接WiFi</h6>
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" data-toggle="modal" data-target="#scanModal"
+                                       role="button" style="text-decoration:none;">
+                                        <i class="iconfont icon-scan text-gray-600"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form class="user" id="wifiForm" action="postwifi" method="post">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control form-control-user" list="ssids"
+                                               name="ssid" placeholder="WIFI名称" required>
+                                        <datalist id="ssids"></datalist>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control form-control-user"
+                                               name="pwd" placeholder="WIFI密码" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">连接</button>
+                                </form>
+                                <hr>
+                            </div>
+                        </div>
+                        <!-- Host modify -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">修改服务器配置</h6>
+                            </div>
+                            <div class="card-body">
+                                <form class="user" id="hostForm" action="posthost" method="post">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control form-control-user" name="Host"
+                                               placeholder="服务器域名或IP" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" class="form-control form-control-user" name="Port"
+                                               min="1" max="65535" placeholder="服务器端口" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">提交</button>
+                                </form>
+                                <hr>
+                            </div>
+                        </div>
+                        <!-- config info -->
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Accordion -->
+                            <a href="#configCollapseCard" class="d-block card-header py-3" data-toggle="collapse"
+                               role="button" aria-expanded="true" aria-controls="configCollapseCard">
+                                <h6 class="m-0 font-weight-bold text-primary">系统保存的配置信息</h6>
+                            </a>
+                            <!-- Card Content - Collapse -->
+                            <div class="collapse show" id="configCollapseCard">
+                                <div class="card-body">
+                                    <h2>Station&AccessPoint</h2>
+                                    <ul class="list-unstyled">
+                                        <li>已保存的WiFi
+                                            <ul id="savedWiFi">
+                                                <li>读取中</li>
+                                            </ul>
+                                        </li>
+                                        <li>AP配置
+                                            <ul id="AP">
+                                                <li>读取中</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <h2>Client</h2>
+                                    <ul class="list-unstyled">
+                                        <li>服务器
+                                            <ul id="server">
+                                                <li>读取中</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <!-- WiFi Scan -->
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Accordion -->
+                            <a href="#scanCollapseCard" class="d-block card-header py-3" data-toggle="collapse"
+                               role="button" aria-expanded="true" aria-controls="ScanCollapseCard">
+                                <h6 class="m-0 font-weight-bold text-primary">扫描到的WiFi</h6>
+                            </a>
+                            <!-- Card Content - Collapse -->
+                            <div class="collapse show" id="scanCollapseCard">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover" style="text-align: center;">
+                                            <thead class="thead-dark">
+                                            <tr>
+                                                <th>SSID</th>
+                                                <th>MAC</th>
+                                                <th>RSSI</th>
+                                                <th>Authmode</th>
+                                                <th>Channel</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="scan"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- log -->
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Accordion -->
+                            <a href="#logCollapseCard" class="d-block card-header py-3" data-toggle="collapse"
+                               role="button" aria-expanded="true" aria-controls="logCollapseCard">
+                                <h6 class="m-0 font-weight-bold text-primary">服务器响应记录</h6>
+                            </a>
+                            <!-- Card Content - Collapse -->
+                            <div class="collapse show" id="logCollapseCard">
+                                <div class="card-body embed-responsive embed-responsive-1by1">
+                                    <div class="embed-responsive-item" style="padding: 15px;">
+<pre style="background-color: #1e1e1e; font-family: 'Ubuntu Mono', monospace; color: #FAFAFA; padding: 15px 10px; height: 100%; white-space: pre-wrap; word-wrap: break-word;
+" id="response">
+</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Setting Row 1-->
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <a href="https://github.com/windfallw" role="button" target="_blank"
+                       style="text-decoration:none;">
+                        <i class="iconfont icon-GitHub text-dark" aria-hidden="true"
+                           style="font-size:24px;"></i>
+                    </a>
+                    <span>Copyright &copy; 2020 ESP32-Web-Console by windfallw</span>
+                </div>
+            </div>
+        </footer>
+        <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top" style="text-decoration:none;">
+    <i class="iconfont icon-up"></i>
+</a>
+
+<!--Station Info Modal-->
+<div class="modal fade" id="stationModal" tabindex="-1" role="dialog" aria-labelledby="stationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stationModalLabel">ESP32 WiFi Station</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="stationInfo">
+                <p class="text-gray-900">当前连接WiFi的名称: 读取中</p>
+                <p class="text-gray-900">WiFi信号强度: 读取中</p>
+                <p class="text-gray-900">IP: 读取中</p>
+                <p class="text-gray-900">子网掩码: 读取中</p>
+                <p class="text-gray-900">网关: 读取中</p>
+                <p class="text-gray-900">DNS服务器: 读取中</p>
+                <p class="text-gray-900">Station MAC地址: 读取中</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--AP Info Modal-->
+<div class="modal fade" id="apModal" tabindex="-1" role="dialog" aria-labelledby="apModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="apModalLabel">ESP32 WiFi Access Point</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="apInfo">
+                <p class="text-gray-900">AP热点名称: 读取中</p>
+                <p class="text-gray-900">认证模式: 读取中</p>
+                <p class="text-gray-900">IP: 读取中</p>
+                <p class="text-gray-900">子网掩码: 读取中</p>
+                <p class="text-gray-900">网关: 读取中</p>
+                <p class="text-gray-900">DNS服务器: 读取中</p>
+                <p class="text-gray-900">Access Point MAC地址: 读取中</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--reset Modal-->
+<div class="modal fade" id="resetModal" tabindex="-1" role="dialog" aria-labelledby="resetModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetModalLabel">确定要重启?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">点击确定将重启ESP32，重启后会自动连接已保存的WiFi</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="machine('reset');">确定
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--scan Modal-->
+<div class="modal fade" id="scanModal" tabindex="-1" role="dialog" aria-labelledby="scanModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scanModalLabel">扫描周围WiFi?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">点击确定将扫描周围WiFi,占用性能较多可能出现卡顿</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="machine('scan');">确定
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap core JavaScript-->
+<script src="../src/jquery.min.js"></script>
+<script src="../src/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="../src/jquery.easing.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="../src/sb-admin-2.min.js"></script>
+
+<!-- Page level plugins-->
+<script src="../src/Chart.min.js"></script>
+<script src="https://webapi.amap.com/maps?v=1.4.15&key=your key"></script>
+
+<!-- Page level custom scripts-->
+<script src="../src/setchart.js"></script>
+<script src="../src/setmap.js"></script>
+<script src="../src/core.js"></script>
+
+</body>
+
+</html>
