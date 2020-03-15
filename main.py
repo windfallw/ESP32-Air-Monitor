@@ -1,5 +1,6 @@
 from machine import Pin, I2C,Timer,UART
 from micropython import mem_info
+import re
 import json
 import _thread
 import urequests
@@ -85,17 +86,29 @@ def webserver():
         try:
             request = client.recv(1024).decode().split('\r\n')
             route=request[0].split(' ')
-            # print(route)
-            print("client connected from", address, client)
+            print(route[1])# request_url
+            # print("client connected from", address, client)
             # client.sendall('HTTP/1.1 200 OK\nConnection: close\nServer: ESP32-Webserver\nContent-Type: text/html\n\n')
             # client.sendall('<script>alert("Welcome!");</script>')
             if route[1]=='/':
                 with open('index.html', 'r') as html:
                     client.sendall(html.read())
+                ssids = station.scan()
+                for i in ssids:
+                    client.sendall(i[0].decode())
+                    client.sendall('<br>')
+            elif re.match(r'/\?ssid=(.*?)&pwd=(.*)',route[1]):
+                obj = re.match(r'/\?ssid=(.*?)&pwd=(.*)', route[1])
+                client.sendall('<br>')
+                client.sendall(obj.group(1))
+                client.sendall('<br>')
+                client.sendall(obj.group(2))
+                client.sendall('<br>')
+                client.sendall("Success")
             elif route[1]=='/api':
                 client.sendall(json.dumps(Air))
             else:
-                client.sendall("<h1>404NOFOUND ):</h1><hr><a href=\"https://github.com/hhh123123123\" style=\"text-decoration:none;\">Welcome to->MY GITHUB</a>")
+                client.sendall("<h1>404 NOFOUND   ):</h1><hr><a href=\"https://github.com/hhh123123123\" style=\"text-decoration:none;\">Welcome to->MY GITHUB</a>")
             client.close()
         except:
             client.close()
@@ -106,9 +119,7 @@ if __name__ == '__main__':
     tim1.init(period=1000, mode=Timer.PERIODIC, callback=lambda t1: refresh_oled())  # 一秒刷新一次oled
     configwifi()
     ap.active(True)
-    ap.config(essid="ESP32-Webconfig", authmode=network.AUTH_WPA_WPA2_PSK, password="12345678")
-    # ssids=station.scan()
-    # print(ssids)
+    ap.config(essid="ESP32-Webconfig", authmode=4, password="12345678") #authmode=network.AUTH_WPA_WPA2_PSK=4
     _thread.start_new_thread(webserver, ()) # 多线程运行webserver
     # _thread.start_new_thread(Apiserver, ())
 
