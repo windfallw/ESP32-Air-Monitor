@@ -1,5 +1,6 @@
 from machine import Pin, I2C,Timer,UART
 from micropython import mem_info
+import json
 import _thread
 import urequests
 import network
@@ -29,6 +30,8 @@ i2c = I2C(scl=Pin(15), sda=Pin(4), freq=100000)
 lcd = ssd1306.SSD1306_I2C(128, 64, i2c)
 uart = UART(1, baudrate=115200, bits=8, rx=9, tx=10, stop=1, timeout=10)
 
+Air={"PM1_0CF1":"31","PM2_5CF1":"46","PM10CF1":"58","PM1_0AE":"34","PM2_5AE":"43","PM10AE":"48","Gt0_3um":"1620","Gt0_5um":"288","Gt1_0um":"32","Gt2_5um"
+:"9","Gt5_0um":"2","Gt10um":"1"}
 
 def checkwifi():
     global timeout
@@ -79,10 +82,24 @@ def webserver():
     print("listen on 80.")
     while True:
         client, address = s.accept()
-        print("client connected from", address, client)
-        request = client.recv(1024)
-        client.sendall('<script>alert("Configuration successful! This hotspot will be closed!");</script>')
-        client.close()
+        try:
+            request = client.recv(1024).decode().split('\r\n')
+            route=request[0].split(' ')
+            # print(route)
+            print("client connected from", address, client)
+            # client.sendall('HTTP/1.1 200 OK\nConnection: close\nServer: ESP32-Webserver\nContent-Type: text/html\n\n')
+            # client.sendall('<script>alert("Welcome!");</script>')
+            if route[1]=='/':
+                with open('index.html', 'r') as html:
+                    client.sendall(html.read())
+            elif route[1]=='/api':
+                client.sendall(json.dumps(Air))
+            else:
+                client.sendall("<h1>404NOFOUND ):</h1><hr><a href=\"https://github.com/hhh123123123\" style=\"text-decoration:none;\">Welcome to->MY GITHUB</a>")
+            client.close()
+        except:
+            client.close()
+            pass
 
 
 if __name__ == '__main__':
@@ -93,7 +110,7 @@ if __name__ == '__main__':
     # ssids=station.scan()
     # print(ssids)
     _thread.start_new_thread(webserver, ()) # 多线程运行webserver
-    # _thread.start_new_thread(recstc8, ())
+    # _thread.start_new_thread(Apiserver, ())
 
     while True:
         if(uart.any()):
