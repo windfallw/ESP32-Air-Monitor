@@ -133,6 +133,18 @@ def rwjson(c):
         pass
 
 
+def firstload():
+    global jsondoc
+    rwjson(True)  # 读取json文件里的数据
+    station.active(True)
+    ssids = station.scan()
+    for i in jsondoc['Sid_Pwd']:
+        for j in ssids:
+            if j[0].decode() == i['ssid']:
+                if configwifi(i['ssid'], i['password']):
+                    return
+
+
 def savekey(sid, pwd):
     global jsondoc
     for i in jsondoc['Sid_Pwd']:
@@ -160,14 +172,7 @@ if __name__ == '__main__':
     # uart1 = UART(1, baudrate=115200, bits=8, rx=9, tx=10, stop=1, timeout=10)   # 串口1串口2，还有一个串口被micropython使用
     uart2 = UART(2, baudrate=115200, bits=8, rx=16, tx=17, stop=1, timeout=10)
 
-    rwjson(True)  # 读取json文件里的数据
-    station.active(True)
-    ssids = station.scan()
-    for i in jsondoc['Sid_Pwd']:
-        for j in ssids:
-            if j[0].decode() == i['ssid']:
-                if configwifi(i['ssid'], i['password']):
-                    break
+    firstload()  # sta加载json文件并自动连接WiFi
 
     ap.active(True)
     ap.config(essid="ESP32-Webconfig", authmode=4, password="12345678")  # authmode=network.AUTH_WPA_WPA2_PSK=4
