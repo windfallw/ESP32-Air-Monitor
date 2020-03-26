@@ -1,5 +1,6 @@
 from machine import Pin, I2C, Timer, UART
 from micropython import mem_info
+import response
 import urequests
 import _thread
 import network
@@ -88,34 +89,48 @@ def webserver():
             client, address = s.accept()
             request = client.recv(1024).decode().split('\r\n')
             route = request[0].split(' ')
+            print(address, client)
             print(route[1])  # request_url
-            # print("client connected from", address, client)
-            # client.sendall('HTTP/1.1 200 OK\nConnection: close\nServer: ESP32-Webserver\nContent-Type: text/html\n\n')
             # client.sendall('<script>alert("Welcome!");</script>')
+
             if route[1] == '/':
+                client.sendall(response.header200())
                 with open('index.html', 'r') as html:
                     client.sendall(html.read())
-                ssids = station.scan()
-                for i in ssids:
+                sids = station.scan()
+                for i in sids:
                     client.sendall(i[0].decode())
                     client.sendall('<br>')
+
             elif re.match(r'/\?ssid=(.*?)&pwd=(.*)', route[1]):
-                obj = re.match(r'/\?ssid=(.*?)&pwd=(.*)', route[1])
-                # sid=obj.group(1);pwd=obj.group(2)
+                obj1 = re.match(r'/\?ssid=(.*?)&pwd=(.*)', route[1])   # sid=obj.group(1);pwd=obj.group(2)
+
+                client.sendall(response.header200())
                 client.sendall("<p>Waiting......</p>")
-                if configwifi(obj.group(1), obj.group(2)):
-                    client.sendall("<p>Connect to {0} </p>".format(obj.group(1)))
-                    savekey(obj.group(1), obj.group(2))
+
+                if not re.match('192.168.4', address[0]):
+                    client.sendall("<p>当前访问IP是 {0} ,WIFI连接过程中将中断Web通信,连接结果看OLED屏</p>".format(address[0]))
+                    client.close()
+                    configwifi(obj1.group(1), obj1.group(2))
+                    continue
+
+                if configwifi(obj1.group(1), obj1.group(2)):
+                    client.sendall("<p>Connected to {0} </p>".format(obj1.group(1)))
+                    savekey(obj1.group(1), obj1.group(2))
                 else:
                     client.sendall("<p>Fail......</p>")
+
             elif route[1] == '/api':
+                client.sendall(response.header200('json'))
                 client.sendall(json.dumps(Air))
+
             else:
-                client.sendall(
-                    "<h1>404 NOFOUND   ):</h1><hr><a href=\"https://github.com/hhh123123123\" style=\"text-decoration:none;\">Welcome to->MY GITHUB</a>")
+                client.sendall(response.header404())
+
             client.close()
-        except:
-            pass
+
+        except OSError as e:
+            print(e)
 
 
 def rwjson(c):
@@ -161,13 +176,13 @@ def analysis():
         if (uart2.any()):
             rec = uart2.read().decode()
             # print(rec)
-        time.sleep(0.05)  # 不加延迟会卡死不知道为什么
+        time.sleep(0.05)  # 不加延迟且串口没有收到数据的时候会卡死
 
 
 if __name__ == '__main__':
     tim0 = Timer(0)
     tim1 = Timer(1)
-    tim0.init(period=10000, mode=Timer.PERIODIC, callback=checkwifi)  # 检测WiFi是否断线,防止无限重连
+    tim0.init(period=50000, mode=Timer.PERIODIC, callback=checkwifi)  # 检测WiFi是否断线,防止无限重连
     tim1.init(period=1000, mode=Timer.PERIODIC, callback=refresh_oled)  # 一秒刷新一次oled
     # uart1 = UART(1, baudrate=115200, bits=8, rx=9, tx=10, stop=1, timeout=10)   # 串口1串口2，还有一个串口被micropython使用
     uart2 = UART(2, baudrate=115200, bits=8, rx=16, tx=17, stop=1, timeout=10)
@@ -180,10 +195,10 @@ if __name__ == '__main__':
     lock = _thread.allocate_lock()
 
     _thread.start_new_thread(webserver, ())  # 多线程运行webserver
-    # _thread.start_new_thread(analysis, ()) # 接受串口数据
+    _thread.start_new_thread(analysis, ()) # 接受串口数据
 
-    while True:
-        if (uart2.any()):
-            rec = uart2.read().decode()
-            # print(rec)
-        time.sleep(0.05)  # 不加延迟会卡死不知道为什么
+    # while True:
+    #     if (uart2.any()):
+    #         rec = uart2.read().decode()
+    #         # print(rec)
+    #     time.sleep(0.05)  # 不加延迟且串口没有收到数据的时候会卡死
