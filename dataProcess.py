@@ -60,6 +60,7 @@ def releasepack(data):
             String_GPS = json.dumps(GPS)
     except ValueError as e:
         print(e)
+        print(data)
 
 
 def releasedht():

@@ -116,18 +116,57 @@ def webserver():
                 else:
                     client.sendall("<p>Fail......</p>")
 
-            elif route[1] == '/api/air':
+            elif route[1] == '/info/air':
                 client.sendall(response.header200('json'))
                 client.sendall(dataProcess.String_Air)
 
-            elif route[1] == '/api/gps':
+            elif route[1] == '/info/gps':
                 client.sendall(response.header200('json'))
                 client.sendall(dataProcess.String_GPS)
 
             elif route[1] == '/favicon.ico':
                 client.sendall(response.Icon200)
-                with open('favicon.ico', "r") as f:
-                    client.sendall(f.read())
+                with open('src/favicon.ico', "r") as f:
+                    line = f.read(8192)
+                    while line:
+                        client.sendall(line)
+                        line = f.read(8192)
+                    f.close()
+
+            elif route[1] == '/bootstrap.min.css':
+                client.sendall(response.header200('css'))
+                with open('src/bootstrap.min.css', "r") as f:
+                    line = f.read(8192)
+                    while line:
+                        client.sendall(line)
+                        line = f.read(8192)
+                    f.close()
+
+            elif route[1] == '/bootstrap.min.js':
+                client.sendall(response.header200('javascript'))
+                with open('src/bootstrap.min.js', "r") as f:
+                    line = f.read(8192)
+                    while line:
+                        client.sendall(line)
+                        line = f.read(8192)
+                    f.close()
+
+            elif route[1] == '/echarts.min.js':
+                client.sendall(response.header200('javascript'))
+                with open('src/echarts.min.js', "r") as f:
+                    line = f.read(8192)
+                    while line:
+                        client.sendall(line)
+                        line = f.read(8192)
+                    f.close()
+
+            elif route[1] == '/jquery.min.js':
+                client.sendall(response.header200('javascript'))
+                with open('src/jquery.min.js', "r") as f:
+                    line = f.read(8192)
+                    while line:
+                        client.sendall(line)
+                        line = f.read(8192)
                     f.close()
 
             else:
@@ -142,7 +181,7 @@ def webserver():
 def analysis():
     while True:
         if (uart2.any()):
-            rec = uart2.read().decode()
+            rec = uart2.readline().decode()
             dataProcess.releasepack(rec)
 
         time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死
@@ -173,10 +212,11 @@ if __name__ == '__main__':
     machine.freq()
 
     _thread.start_new_thread(webserver, ())  # 多线程运行webserver
-    # _thread.start_new_thread(analysis, ())  # 接受串口数据
+    _thread.start_new_thread(analysis, ())  # 接受串口数据
 
-    while True:
-        if (uart2.any()):
-            rec = uart2.read().decode()
-            dataProcess.releasepack(rec)
-        time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死
+
+    # while True:
+    #     if (uart2.any()):
+    #         rec = uart2.readline().decode()
+    #         dataProcess.releasepack(rec)
+        # time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候可能会卡死

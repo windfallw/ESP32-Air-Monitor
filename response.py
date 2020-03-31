@@ -40,8 +40,7 @@ def header200(tp='html', charset='utf-8'):
     for i in dType.keys():
         if tp == i:
             return OK200.format(dType[tp], charset)
-        else:
-            return OK200.format(dType['html'], charset)
+    return OK200.format(dType['html'], charset)
 
 
 def header404(tp='html'):
