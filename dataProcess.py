@@ -6,7 +6,7 @@ humidity = 0
 temperature = 0
 dht11 = dht.DHT11(Pin(25))
 
-jsondoc = {
+conf = {
     'Sid_Pwd': [{'ssid': 'example', 'password': 'yourpassword'}]
 }
 
@@ -21,46 +21,42 @@ String_GPS = json.dumps(GPS)
 
 
 def rwjson(c):
-    global jsondoc
+    global conf
     try:
         if c:
             with open('wificonfig.json', "r") as f:
-                jsondoc = json.loads(f.read())
+                conf = json.loads(f.read())
             f.close()
         else:
             with open('wificonfig.json', "w") as f:
-                f.write(json.dumps(jsondoc))
+                f.write(json.dumps(conf))
             f.close()
     except:
         pass
 
 
 def savekey(sid, pwd):
-    global jsondoc
-    for i in jsondoc['Sid_Pwd']:
+    global conf
+    for i in conf['Sid_Pwd']:
         if sid == i['ssid']:
             i['password'] = pwd
             rwjson(False)  # 写入json
             return
-    jsondoc['Sid_Pwd'].append({'ssid': sid, 'password': pwd})
+    conf['Sid_Pwd'].append({'ssid': sid, 'password': pwd})
     rwjson(False)
 
 
 def releasepack(data):
     global Air, GPS, String_Air, String_GPS
-    try:
-        jsLoads = json.loads(data)
-        if jsLoads['type'] == 'pms7003':
-            Air = jsLoads
-            Air['humidity'] = humidity
-            Air['temperature'] = temperature
-            String_Air = json.dumps(Air)
-        elif jsLoads['type'] == 'gps':
-            GPS = jsLoads
-            String_GPS = json.dumps(GPS)
-    except ValueError as e:
-        print(e)
-        print(data)
+    js_loads = json.loads(data)
+    if js_loads['type'] == 'pms7003':
+        Air = js_loads
+        Air['humidity'] = humidity
+        Air['temperature'] = temperature
+        String_Air = json.dumps(Air)
+    elif js_loads['type'] == 'gps':
+        GPS = js_loads
+        String_GPS = json.dumps(GPS)
 
 
 def releasedht():

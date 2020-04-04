@@ -1,16 +1,13 @@
-import response
 import dataProcess
-
-import micropython
-import machine
-import urequests
+import httpResponse
+import httpRequest
+import ssd1306
 import _thread
 import network
 import socket
-import ssd1306
+import machine
 import time
-
-import esp
+import gc
 import re
 
 ip = "0.0.0.0"
@@ -68,14 +65,14 @@ def firstload():
     dataProcess.rwjson(True)  # 读取json文件里的数据
     station.active(True)
     ssids = station.scan()
-    for i in dataProcess.jsondoc['Sid_Pwd']:
+    for i in dataProcess.conf['Sid_Pwd']:
         for j in ssids:
             if j[0].decode() == i['ssid']:
                 if configwifi(i['ssid'], i['password']):
                     return
 
 
-def webserver():
+def Webserver():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(('0.0.0.0', 80))
@@ -90,8 +87,8 @@ def webserver():
             print(route[1])  # request_url
 
             if route[1] == '/':
-                client.sendall(response.header200())
-                with open('index.html', 'r') as html:
+                client.sendall(httpResponse.header200())
+                with open('www/index.html', 'r') as html:
                     client.sendall(html.read())
                 sids = station.scan()
                 for i in sids:
@@ -101,7 +98,7 @@ def webserver():
             elif re.match(r'/\?ssid=(.*?)&pwd=(.*)', route[1]):
                 obj1 = re.match(r'/\?ssid=(.*?)&pwd=(.*)', route[1])  # sid=obj.group(1);pwd=obj.group(2)
 
-                client.sendall(response.header200())
+                client.sendall(httpResponse.header200())
                 client.sendall("<p>Waiting......</p>")
 
                 if not re.match('192.168.4', address[0]):
@@ -117,16 +114,16 @@ def webserver():
                     client.sendall("<p>Fail......</p>")
 
             elif route[1] == '/info/air':
-                client.sendall(response.header200('json'))
+                client.sendall(httpResponse.header200('json'))
                 client.sendall(dataProcess.String_Air)
 
             elif route[1] == '/info/gps':
-                client.sendall(response.header200('json'))
+                client.sendall(httpResponse.header200('json'))
                 client.sendall(dataProcess.String_GPS)
 
             elif route[1] == '/favicon.ico':
-                client.sendall(response.Icon200)
-                with open('src/favicon.ico', "r") as f:
+                client.sendall(httpResponse.Icon200)
+                with open('www/favicon.ico', "r") as f:
                     line = f.read(8192)
                     while line:
                         client.sendall(line)
@@ -134,7 +131,7 @@ def webserver():
                     f.close()
 
             elif route[1] == '/bootstrap.min.css':
-                client.sendall(response.header200('css'))
+                client.sendall(httpResponse.header200('css'))
                 with open('src/bootstrap.min.css', "r") as f:
                     line = f.read(8192)
                     while line:
@@ -142,9 +139,9 @@ def webserver():
                         line = f.read(8192)
                     f.close()
 
-            elif route[1] == '/bootstrap.min.js':
-                client.sendall(response.header200('javascript'))
-                with open('src/bootstrap.min.js', "r") as f:
+            elif route[1] == '/bootstrap.bundle.min.js':
+                client.sendall(httpResponse.header200('javascript'))
+                with open('src/bootstrap.bundle.min.js', "r") as f:
                     line = f.read(8192)
                     while line:
                         client.sendall(line)
@@ -152,7 +149,7 @@ def webserver():
                     f.close()
 
             elif route[1] == '/echarts.min.js':
-                client.sendall(response.header200('javascript'))
+                client.sendall(httpResponse.header200('javascript'))
                 with open('src/echarts.min.js', "r") as f:
                     line = f.read(8192)
                     while line:
@@ -161,7 +158,7 @@ def webserver():
                     f.close()
 
             elif route[1] == '/jquery.min.js':
-                client.sendall(response.header200('javascript'))
+                client.sendall(httpResponse.header200('javascript'))
                 with open('src/jquery.min.js', "r") as f:
                     line = f.read(8192)
                     while line:
@@ -170,19 +167,25 @@ def webserver():
                     f.close()
 
             else:
-                client.sendall(response.header404())
+                client.sendall(httpResponse.header404())
+
+        except Exception as e:
+            print('Reason:', e)
+
+        finally:
             client.close()
-
-        except:
-            client.close()
-            print("error in webserver")
+            print('use:', gc.mem_alloc(), 'remain:', gc.mem_free())
 
 
-def analysis():
+def UART2():
     while True:
-        if (uart2.any()):
-            rec = uart2.readline().decode()
-            dataProcess.releasepack(rec)
+        try:
+            if (uart2.any()):
+                rec = uart2.readline().decode()
+                dataProcess.releasepack(rec)
+
+        except Exception as e:
+            print('Reason:', e)
 
         time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死
 
@@ -193,7 +196,7 @@ if __name__ == '__main__':
     # wdt = machine.WDT(timeout=30000)#看门dog
     # machine.reset()重启
     # wdt.feed()
-    tim0.init(period=50000, mode=machine.Timer.PERIODIC, callback=checkwifi)  # 检测WiFi是否断线,防止无限重连
+    tim0.init(period=60000, mode=machine.Timer.PERIODIC, callback=checkwifi)  # 检测WiFi是否断线,防止无限重连
     tim1.init(period=1000, mode=machine.Timer.PERIODIC, callback=refresh_oled)  # 一秒刷新一次oled
     # uart1 = UART(1, baudrate=115200, bits=8, rx=9, tx=10, stop=1, timeout=10)   # 串口1串口2，还有一个串口被micropython使用
     uart2 = machine.UART(2, baudrate=115200, bits=8, rx=16, tx=17, stop=1, timeout=10)
@@ -205,18 +208,11 @@ if __name__ == '__main__':
 
     # lock = _thread.allocate_lock()
 
-    print(esp.flash_size())
-    print(esp.flash_user_start())
-    micropython.mem_info()
-    # machine.freq(160000000)
-    machine.freq()
-
-    _thread.start_new_thread(webserver, ())  # 多线程运行webserver
-    _thread.start_new_thread(analysis, ())  # 接受串口数据
-
+    _thread.start_new_thread(Webserver, ())  # 多线程运行webserver
+    _thread.start_new_thread(UART2, ())  # 接受串口数据
 
     # while True:
     #     if (uart2.any()):
     #         rec = uart2.readline().decode()
     #         dataProcess.releasepack(rec)
-        # time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候可能会卡死
+    # time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候可能会卡死
