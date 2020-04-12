@@ -1,32 +1,60 @@
 <!doctype html>
-<html>
+<html lang="zh">
 <head>
-<meta charset="utf-8">
-<title>index</title>
-    <link rel="stylesheet" href="bootstrap.min.css">
-    <script src="echarts.min.js"></script>
+    <meta charset="utf-8">
+    <title>index</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        var cdn;
+        if (window.jQuery) {
+            cdn = true;
+            document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css"/><\/script>')
+        } else {
+            cdn = false;
+            document.write('<script src="/src/jquery.min.js"><\/script>')
+            document.write('<link rel="stylesheet" href="/src/bootstrap.min.css"><\/script>')
+        }
+    </script>
 </head>
 
 <body>
+
 <button onclick="location.reload()">Scan WIFI</button>
 <br><br>
-
-<form method="get" name="f1" action=" ">
- SSID:<br>
+<form method="post" name="f1" action="/postwifi">
+    SSID:<br>
     <input list="ssids" name="ssid">
     <datalist id="ssids">
-<!--       <option value="none">-->
+        <!--       <option value="none">-->
     </datalist>
     <br><br>
- Password:<br>
+    Password:<br>
     <input type="password" name="pwd">
     <br><br>
     <input type="submit" value="Submit">
     <br>
 </form>
+<br><br>
+<form method="post" name="f2" action="/posthost">
+    Host:<br>
+    <input name="Host">
+    <br><br>
+    Port:<br>
+    <input name="Port">
+    <br><br>
+    <input type="submit" value="Submit">
+    <br>
+</form>
 
-    <script src="jquery.min.js"></script>
-    <script src="bootstrap.bundle.min.js"></script>
+<script>
+    if (cdn) {
+        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.bundle.min.js"><\/script>')
+        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.7.0/echarts.min.js"><\/script>')
+    } else {
+        document.write('<script src="/src/bootstrap.bundle.min.js"><\/script>')
+        document.write('<script src="/src/echarts.min.js"><\/script>')
+    }
+</script>
 </body>
 
 </html>
