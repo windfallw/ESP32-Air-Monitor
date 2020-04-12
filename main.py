@@ -1,4 +1,4 @@
-import dataProcess
+import tools
 import httpResponse
 import httpRequest
 import ssd1306
@@ -24,10 +24,11 @@ oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 def checkwifi(tim0):
     if not station.isconnected():
         station.disconnect()
+    # if ap.isconnected()
 
 
 def refresh_oled(tim1):
-    h, t = dataProcess.releasedht()
+    h, t = tools.releasedht()
     try:
         oled.fill(0)
         oled.text("I" + ip, 0, 0, col=1)
@@ -35,8 +36,8 @@ def refresh_oled(tim1):
         oled.text("Humidity:" + str(h) + "%", 0, 18, col=1)
         oled.text("Temperature:" + str(t) + "'C", 0, 27, col=1)  # Celsius ℃
         oled.show()
-    except:
-        print("error in oled")
+    except Exception as e:
+        print('OLED:', e)
 
 
 def configwifi(sid, pwd):
@@ -62,10 +63,10 @@ def configwifi(sid, pwd):
 
 
 def firstload():
-    dataProcess.rwjson(True)  # 读取json文件里的数据
+    tools.rwjson(True)  # 读取json文件里的数据
     station.active(True)
     ssids = station.scan()
-    for i in dataProcess.conf['Sid_Pwd']:
+    for i in tools.conf['Sid_Pwd']:
         for j in ssids:
             if j[0].decode() == i['ssid']:
                 if configwifi(i['ssid'], i['password']):
@@ -73,7 +74,7 @@ def firstload():
 
 
 def Webserver():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(('0.0.0.0', 80))
     s.listen(1)
@@ -81,112 +82,129 @@ def Webserver():
     while True:
         try:
             client, address = s.accept()
-            request = client.recv(1024).decode().split('\r\n')
-            route = request[0].split(' ')
+            request = client.recv(1024).decode().split('\r\n', 1)
+            route = request[0].split(' ', 2)
+            # print(request)
+            # print(route)
             print(address, client)
             print(route[1])  # request_url
 
-            if route[1] == '/':
-                client.sendall(httpResponse.header200())
-                with open('www/index.html', 'r') as html:
-                    client.sendall(html.read())
-                sids = station.scan()
-                for i in sids:
-                    client.sendall(i[0].decode())
-                    client.sendall('<br>')
+            if route[0].upper() == 'POST':
+                postdata = request[1].rsplit('\r\n', 1)[-1]
+                print(postdata)
 
-            elif re.match(r'/\?ssid=(.*?)&pwd=(.*)', route[1]):
-                obj1 = re.match(r'/\?ssid=(.*?)&pwd=(.*)', route[1])  # sid=obj.group(1);pwd=obj.group(2)
+                if route[1] == '/postwifi':
+                    client.send(httpResponse.header200())
+                    client.send("<p>连接中......</p>")
+                    obj1 = re.match(r'ssid=(.*?)&pwd=(.*)', postdata)
+                    ssid, pwd = obj1.group(1), obj1.group(2)
+                    if not re.match('192.168.4', address[0]):
+                        client.send("<p>当前访问IP是 %s ,WIFI连接过程中将中断Web通信,连接结果看OLED屏</p>" % (address[0]))
+                        client.close()
+                        configwifi(ssid, pwd)
+                        continue
+                    if configwifi(ssid, pwd):
+                        client.send("<p>成功连接到 %s </p>" % (obj1.group(1)))
+                        tools.savewifi(obj1.group(1), obj1.group(2))
+                    else:
+                        client.send("<p>连接失败......the pwd is %s</p>" % (pwd))
 
-                client.sendall(httpResponse.header200())
-                client.sendall("<p>Waiting......</p>")
-
-                if not re.match('192.168.4', address[0]):
-                    client.sendall("<p>当前访问IP是 {0} ,WIFI连接过程中将中断Web通信,连接结果看OLED屏</p>".format(address[0]))
+                if route[1] == '/posthost':
+                    client.send(httpResponse.header200())
+                    client.send("<p>正在设置中......</p>")
+                    obj2 = re.match(r'Host=(.*?)&Port=(.*)', postdata)
+                    host, port = obj2.group(1), int(obj2.group(2))
+                    tools.saverequester(host, port)
+                    client.send("<p>设置完毕......已自动重启</p>")
                     client.close()
-                    configwifi(obj1.group(1), obj1.group(2))
-                    continue
+                    machine.reset()
 
-                if configwifi(obj1.group(1), obj1.group(2)):
-                    client.sendall("<p>Connected to {0} </p>".format(obj1.group(1)))
-                    dataProcess.savekey(obj1.group(1), obj1.group(2))
-                else:
-                    client.sendall("<p>Fail......</p>")
+            elif route[0].upper() == 'GET':
 
-            elif route[1] == '/info/air':
-                client.sendall(httpResponse.header200('json'))
-                client.sendall(dataProcess.String_Air)
+                if route[1] == '/':
+                    client.send(httpResponse.header200())
+                    with open('/www/index.html', 'rb') as html:
+                        client.send(html.read())
+                    sids = station.scan()
+                    for i in sids:
+                        client.send(i[0])
+                        client.send('<br>')
 
-            elif route[1] == '/info/gps':
-                client.sendall(httpResponse.header200('json'))
-                client.sendall(dataProcess.String_GPS)
+                elif route[1] == '/info/air':
+                    client.send(httpResponse.header200('json'))
+                    client.send(tools.String_Air)
 
-            elif route[1] == '/favicon.ico':
-                client.sendall(httpResponse.Icon200)
-                with open('www/favicon.ico', "r") as f:
-                    line = f.read(8192)
-                    while line:
-                        client.sendall(line)
+                elif route[1] == '/info/gps':
+                    client.send(httpResponse.header200('json'))
+                    client.send(tools.String_GPS)
+
+                elif route[1] == '/favicon.ico':
+                    client.send(httpResponse.Icon200)
+                    with open('/www/favicon.ico', 'rb') as f:
                         line = f.read(8192)
-                    f.close()
+                        while line:
+                            client.send(line)
+                            line = f.read(8192)
+                        f.close()
 
-            elif route[1] == '/bootstrap.min.css':
-                client.sendall(httpResponse.header200('css'))
-                with open('src/bootstrap.min.css', "r") as f:
-                    line = f.read(8192)
-                    while line:
-                        client.sendall(line)
+                elif route[1] == '/src/bootstrap.min.css':
+                    client.send(httpResponse.header200('css'))
+                    with open('/src/bootstrap.min.css', 'rb') as f:
                         line = f.read(8192)
-                    f.close()
+                        while line:
+                            client.send(line)
+                            line = f.read(8192)
+                        f.close()
 
-            elif route[1] == '/bootstrap.bundle.min.js':
-                client.sendall(httpResponse.header200('javascript'))
-                with open('src/bootstrap.bundle.min.js', "r") as f:
-                    line = f.read(8192)
-                    while line:
-                        client.sendall(line)
+                elif route[1] == '/src/bootstrap.bundle.min.js':
+                    client.send(httpResponse.header200('javascript'))
+                    with open('/src/bootstrap.bundle.min.js', 'rb') as f:
                         line = f.read(8192)
-                    f.close()
+                        while line:
+                            client.send(line)
+                            line = f.read(8192)
+                        f.close()
 
-            elif route[1] == '/echarts.min.js':
-                client.sendall(httpResponse.header200('javascript'))
-                with open('src/echarts.min.js', "r") as f:
-                    line = f.read(8192)
-                    while line:
-                        client.sendall(line)
+                elif route[1] == '/src/echarts.min.js':
+                    client.send(httpResponse.header200('javascript'))
+                    with open('/src/echarts.min.js', 'rb') as f:
                         line = f.read(8192)
-                    f.close()
+                        while line:
+                            client.send(line)
+                            line = f.read(8192)
+                        f.close()
 
-            elif route[1] == '/jquery.min.js':
-                client.sendall(httpResponse.header200('javascript'))
-                with open('src/jquery.min.js', "r") as f:
-                    line = f.read(8192)
-                    while line:
-                        client.sendall(line)
+                elif route[1] == '/src/jquery.min.js':
+                    client.send(httpResponse.header200('javascript'))
+                    with open('/src/jquery.min.js', 'rb') as f:
                         line = f.read(8192)
-                    f.close()
+                        while line:
+                            client.send(line)
+                            line = f.read(8192)
+                        f.close()
 
             else:
-                client.sendall(httpResponse.header404())
+                client.send(httpResponse.NotFound404)
 
         except Exception as e:
-            print('Reason:', e)
+            print('WEBSrv:', e)
 
         finally:
             client.close()
+            gc.collect()
             print('use:', gc.mem_alloc(), 'remain:', gc.mem_free())
 
 
 def UART2():
+    r = httpRequest.Requester(tools.conf['Requester'])
     while True:
         try:
             if (uart2.any()):
                 rec = uart2.readline().decode()
-                dataProcess.releasepack(rec)
-
+                r.do(tools.releasepack(rec))
         except Exception as e:
-            print('Reason:', e)
-
+            print(rec.encode())
+            print('UART2:', e)
         time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死
 
 
@@ -197,7 +215,7 @@ if __name__ == '__main__':
     # machine.reset()重启
     # wdt.feed()
     tim0.init(period=60000, mode=machine.Timer.PERIODIC, callback=checkwifi)  # 检测WiFi是否断线,防止无限重连
-    tim1.init(period=1000, mode=machine.Timer.PERIODIC, callback=refresh_oled)  # 一秒刷新一次oled
+    tim1.init(period=3000, mode=machine.Timer.PERIODIC, callback=refresh_oled)  # 3秒刷新一次oled
     # uart1 = UART(1, baudrate=115200, bits=8, rx=9, tx=10, stop=1, timeout=10)   # 串口1串口2，还有一个串口被micropython使用
     uart2 = machine.UART(2, baudrate=115200, bits=8, rx=16, tx=17, stop=1, timeout=10)
 
@@ -206,13 +224,5 @@ if __name__ == '__main__':
     ap.active(True)
     ap.config(essid="ESP32-Webconfig", authmode=4, password="12345678")  # authmode=network.AUTH_WPA_WPA2_PSK=4
 
-    # lock = _thread.allocate_lock()
-
     _thread.start_new_thread(Webserver, ())  # 多线程运行webserver
     _thread.start_new_thread(UART2, ())  # 接受串口数据
-
-    # while True:
-    #     if (uart2.any()):
-    #         rec = uart2.readline().decode()
-    #         dataProcess.releasepack(rec)
-    # time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候可能会卡死
