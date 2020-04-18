@@ -3,8 +3,8 @@ import json
 import gc
 
 
-class Requester:
-    RequestHeaders = '''
+class HttpRequest:
+    RequestHeader_template = '''
 {0} {1} HTTP/1.1
 host: {2}
 Content-Type: application/json
@@ -15,39 +15,39 @@ content-length: {3}
     url = 'https://www.example.com/info/sendair'
     method = 'POST'
     host = 'www.example.com'
-    Path = {'pms7003': '/info/sendair', 'gps': '/info/sendgps'}
+    Path = {'pms7003': '/info/sendair', 'gps': '/info/sendgps', 'voc': '/info/sendvoc'}
     Proto = 'http'
     Port = 80
 
-    def __init__(self,conf):
-        self.host=conf['host']
-        self.Proto=conf['Proto']
-        self.Port=conf['Port']
-        self.method=conf['method']
-        self.Path=conf['Path']
+    def __init__(self, conf):
+        self.Proto = conf['Proto']
+        self.Port = conf['Port']
+        self.method = conf['method']
+        self.Path = conf['Path']
+        self.host = conf['host']
 
-    def do(self, rec):
+    def do(self, UartRecv):
         # You must use getaddrinfo() even for numeric addresses 您必须使用getaddrinfo()，即使是用于数字型地址
         # [(2, 1, 0, 'www.example.com', ('12.34.56.78', 80))](family, type, proto, canonname, sockaddr)
         try:
             sockinfo = socket.getaddrinfo(self.host, self.Port)[0]
             s = socket.socket(sockinfo[0], sockinfo[1], sockinfo[2])
 
-            t = rec['type']
-            if t == 'pms7003' or t == 'gps':
-                rec = json.dumps(rec)
-                rh = self.RequestHeaders.format(self.method, self.Path[t], self.host, len(rec))
+            t = UartRecv['type']
+            if t == 'pms7003' or t == 'gps' or t == 'voc':
+                UartRecv = json.dumps(UartRecv)
+                RequestHeader = self.RequestHeader_template.format(self.method, self.Path[t], self.host, len(UartRecv))
             else:
                 return None
 
             s.settimeout(10)
             s.connect(sockinfo[-1])
-            #https占用资源巨大慎用
+            # https占用资源巨大慎用
             if self.Proto == 'https':
                 import ssl
                 s = ssl.wrap_socket(s)
-            s.write(rh)
-            s.write(rec)
+            s.write(RequestHeader)
+            s.write(UartRecv)
             # print(s.readline())
             # while True:
             #     h = s.readline()
@@ -55,7 +55,7 @@ content-length: {3}
             #         break
             #     print(h.decode())
         except Exception as e:
-            print('Requester:',e)
+            print('HttpRequest:', e)
         finally:
             s.close()
             gc.collect()
