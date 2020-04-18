@@ -8,11 +8,11 @@
         var cdn;
         if (window.jQuery) {
             cdn = true;
-            document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css"/><\/script>')
+            document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css"/><\/script>');
         } else {
             cdn = false;
-            document.write('<script src="/src/jquery.min.js"><\/script>')
-            document.write('<link rel="stylesheet" href="/src/bootstrap.min.css"><\/script>')
+            document.write('<script src="/src/jquery.min.js"><\/script>');
+            document.write('<link rel="stylesheet" href="/src/bootstrap.min.css"><\/script>');
         }
     </script>
 </head>
@@ -21,26 +21,26 @@
 
 <button onclick="location.reload()">Scan WIFI</button>
 <br><br>
-<form method="post" name="f1" action="/postwifi">
+<form method="post" name="f1" action="postwifi">
     SSID:<br>
-    <input list="ssids" name="ssid">
+    <input list="ssids" name="ssid" placeholder="WIFI名称" required>
     <datalist id="ssids">
         <!--       <option value="none">-->
     </datalist>
     <br><br>
     Password:<br>
-    <input type="password" name="pwd">
+    <input type="password" name="pwd" placeholder="WIFI密码" required>
     <br><br>
     <input type="submit" value="Submit">
     <br>
 </form>
 <br><br>
-<form method="post" name="f2" action="/posthost">
+<form method="post" name="f2" action="posthost">
     Host:<br>
-    <input name="Host">
+    <input name="Host" placeholder="服务器域名或IP" required>
     <br><br>
     Port:<br>
-    <input name="Port">
+    <input name="Port"  type="number" min="1" max="65535" placeholder="服务器端口" required>
     <br><br>
     <input type="submit" value="Submit">
     <br>
@@ -48,11 +48,11 @@
 
 <script>
     if (cdn) {
-        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.bundle.min.js"><\/script>')
-        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.7.0/echarts.min.js"><\/script>')
+        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.bundle.min.js"><\/script>');
+        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.7.0/echarts.min.js"><\/script>');
     } else {
-        document.write('<script src="/src/bootstrap.bundle.min.js"><\/script>')
-        document.write('<script src="/src/echarts.min.js"><\/script>')
+        document.write('<script src="/src/bootstrap.bundle.min.js"><\/script>');
+        document.write('<script src="/src/echarts.min.js"><\/script>');
     }
 </script>
 </body>

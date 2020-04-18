@@ -6,11 +6,11 @@ humidity = 0
 temperature = 0
 dht11 = dht.DHT11(Pin(25))
 
-Requesterdir = {'Proto': 'http', 'host': 'www.example.com', 'Port': 80, 'method': 'POST',
-                'Path': {'pms7003': '/info/sendair', 'gps': '/info/sendgps'}}
+httpRequestDir = {'Proto': 'http', 'host': 'www.example.com', 'Port': 80, 'method': 'POST',
+                  'Path': {'pms7003': '/info/sendair', 'gps': '/info/sendgps', 'voc': '/info/sendvoc'}}
 conf = {
-    'Sid_Pwd': [{'ssid': 'example', 'password': 'yourpassword'}],
-    'Requester': Requesterdir
+    'network': [{'ssid': 'example', 'password': 'yourpassword'}],
+    'httpRequest': httpRequestDir
 }
 
 PMS7003 = ''
@@ -34,20 +34,20 @@ def rwjson(c):
 
 def savewifi(sid, pwd):
     global conf
-    for i in conf['Sid_Pwd']:
+    for i in conf['network']:
         if sid == i['ssid']:
             i['password'] = pwd
             rwjson(False)  # 写入json
             return
-    conf['Sid_Pwd'].append({'ssid': sid, 'password': pwd})
+    conf['network'].append({'ssid': sid, 'password': pwd})
     rwjson(False)
 
 
-def saverequester(host, port):
+def savehttpRequest(host, port):
     global conf
-    Requesterdir['host'] = host
-    Requesterdir['Port'] = port
-    conf['Requester'] = Requesterdir
+    httpRequestDir['host'] = host
+    httpRequestDir['Port'] = port
+    conf['httpRequest'] = httpRequestDir
     rwjson(False)
 
 
