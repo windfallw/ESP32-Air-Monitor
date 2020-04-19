@@ -3,21 +3,27 @@
 <head>
     <meta charset="utf-8">
     <title>index</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script>
-        var cdn;
-        if (window.jQuery) {
-            cdn = true;
-            document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css"/><\/script>');
-        } else {
-            cdn = false;
-            document.write('<script src="/src/jquery.min.js"><\/script>');
-            document.write('<link rel="stylesheet" href="/src/bootstrap.min.css"><\/script>');
-        }
-    </script>
+    <link rel="stylesheet" href="/src/bootstrap.min.css">
+    <script src="/src/jquery.min.js"></script>
+    <script src="/src/bootstrap.bundle.min.js"></script>
+    <script src="/src/echarts.min.js"></script>
 </head>
 
 <body>
+<ul class="nav">
+  <li class="nav-item">
+    <a class="nav-link active" href="#">Active</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">Link</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">Link</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link disabled" href="#">Disabled</a>
+  </li>
+</ul>
 
 <button onclick="location.reload()">Scan WIFI</button>
 <br><br>
@@ -46,15 +52,30 @@
     <br>
 </form>
 
-<script>
-    if (cdn) {
-        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.bundle.min.js"><\/script>');
-        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.7.0/echarts.min.js"><\/script>');
-    } else {
-        document.write('<script src="/src/bootstrap.bundle.min.js"><\/script>');
-        document.write('<script src="/src/echarts.min.js"><\/script>');
-    }
-</script>
+
+
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>-->
+<!--    <script>-->
+<!--        var cdn;-->
+<!--        if (window.jQuery) {-->
+<!--            cdn = true;-->
+<!--            document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css"/><\/script>');-->
+<!--        } else {-->
+<!--            cdn = false;-->
+<!--            document.write('<script src="/src/jquery.min.js"><\/script>');-->
+<!--            document.write('<link rel="stylesheet" href="/src/bootstrap.min.css"><\/script>');-->
+<!--        }-->
+<!--    </script>-->
+
+<!--<script>-->
+<!--    if (cdn) {-->
+<!--        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.bundle.min.js"><\/script>');-->
+<!--        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.7.0/echarts.min.js"><\/script>');-->
+<!--    } else {-->
+<!--        document.write('<script src="/src/bootstrap.bundle.min.js"><\/script>');-->
+<!--        document.write('<script src="/src/echarts.min.js"><\/script>');-->
+<!--    }-->
+<!--</script>-->
 </body>
 
 </html>
