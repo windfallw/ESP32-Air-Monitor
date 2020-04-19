@@ -71,7 +71,7 @@ def firstload():
                     return
 
 
-app = Webserver.WebServant()
+app = Webserver.WebServant(static_path='/src', template_path='/www')
 
 
 @app.route('/')
@@ -84,10 +84,10 @@ def index(*function):
             client.send(line)
             line = f.read(8192)
         f.close()
-    sids = station.scan()
-    for i in sids:
-        client.send(i[0])
-        client.send('<br>')
+    # sids = station.scan()
+    # for i in sids:
+    #     client.send(i[0])
+    #     client.send('<br>')
 
 
 @app.route('/info/air')
