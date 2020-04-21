@@ -90,8 +90,10 @@ class WebServant:
         gc.collect()
 
     def add_file_to_route(self, file_path, route_path, type):
-        def file_function(*function, p=file_path, t=type):
-            client, address = function
+        """此函数可以直接将指定文件添加到路由表里，但你应当在init初始化里完成"""
+
+        def file_function(*arguments, p=file_path, t=type):
+            client, address = arguments
             client.send(header200(t))
             with open(p, 'rb') as f:
                 line = f.read(8192)
