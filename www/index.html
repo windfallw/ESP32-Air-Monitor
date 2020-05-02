@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,9 +9,9 @@
 
     <!-- Custom fonts for this template-->
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
-    <!-- Custom styles for this template-->
-    <link rel="stylesheet" href="src/sb-admin-2.min.css">
 
+    <!-- Custom styles for this template-->
+    <link rel="stylesheet" href="../src/sb-admin-2.min.css">
 </head>
 
 <body id="page-top">
@@ -173,7 +174,8 @@
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">CPU工作频率
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            CPU工作频率
                                         </div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">24000000</div>
                                     </div>
@@ -191,7 +193,8 @@
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">内存使用情况
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            内存使用情况
                                         </div>
                                         <div class="row no-gutters align-items-center">
                                             <div class="col-auto">
@@ -220,7 +223,8 @@
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">串口处理次数</div>
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">串口处理次数
+                                        </div>
                                         <div class="h5 mb-0 font-weight-bold text-gray-800">1000</div>
                                     </div>
                                     <div class="col-auto">
@@ -259,7 +263,8 @@
                     <div class="col-xl-8 col-lg-7">
                         <div class="card shadow mb-4">
                             <!-- Card Header - Dropdown -->
-                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <div
+                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <h6 class="m-0 font-weight-bold text-primary">PMS7003M</h6>
                                 <div class="dropdown no-arrow">
                                     <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink1"
@@ -268,23 +273,20 @@
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                          aria-labelledby="dropdownMenuLink1">
-                                        <button class="dropdown-item" onclick="switchA('#PM1_0');">PM1.0浓度</button>
-                                        <button class="dropdown-item" onclick="switchA('#PM2_5');">PM2.5浓度</button>
-                                        <button class="dropdown-item" onclick="switchA('#PM10');">PM10浓度</button>
-                                        <button class="dropdown-item" onclick="switchA('#GT');">空气中颗粒物</button>
+                                        <div class="dropdown-header">图表设置</div>
+                                        <button class="dropdown-item" onclick="switchAreaChart(0);">PM1.0浓度</button>
+                                        <button class="dropdown-item" onclick="switchAreaChart(1);">PM2.5浓度</button>
+                                        <button class="dropdown-item" onclick="switchAreaChart(2);">PM10浓度</button>
+                                        <div class="dropdown-divider"></div>
+                                        <button class="dropdown-item" onclick="switchAreaChart(3);">空气中颗粒物</button>
                                     </div>
                                 </div>
                             </div>
                             <!-- Card Body -->
                             <div class="card-body">
-                                <div class="chart-area" id="PM1_0">
+                                <div class="chart-area">
+                                    <canvas id="AreaChart"></canvas>
                                 </div>
-                                <!-- <div class="chart-area" id="PM2_5">
-                                </div>
-                                <div class="chart-area" id="PM10">
-                                </div>
-                                <div class="chart-area" id="GT">
-                                </div> -->
                             </div>
                         </div>
                     </div>
@@ -293,7 +295,8 @@
                     <div class="col-xl-4 col-lg-5">
                         <div class="card shadow mb-4">
                             <!-- Card Header - Dropdown -->
-                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <div
+                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <h6 class="m-0 font-weight-bold text-primary">DHT11</h6>
                                 <div class="dropdown no-arrow">
                                     <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
@@ -313,18 +316,18 @@
                             <!-- Card Body -->
                             <div class="card-body">
                                 <div class="chart-pie pt-4 pb-2">
-
+                                    <canvas id="PieChart"></canvas>
                                 </div>
                                 <div class="mt-4 text-center small">
-                    <span class="mr-2">
-                      <i class="fas fa-circle text-primary"></i> Direct
-                    </span>
+                                        <span class="mr-2">
+                                            <i class="fas fa-circle text-primary"></i> Direct
+                                        </span>
                                     <span class="mr-2">
-                      <i class="fas fa-circle text-success"></i> Social
-                    </span>
+                                            <i class="fas fa-circle text-success"></i> Social
+                                        </span>
                                     <span class="mr-2">
-                      <i class="fas fa-circle text-info"></i> Referral
-                    </span>
+                                            <i class="fas fa-circle text-info"></i> Referral
+                                        </span>
                                 </div>
                             </div>
                         </div>
@@ -340,9 +343,9 @@
                         <!-- MAP Card -->
                         <div class="card shadow mb-4">
                             <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">GPS Map <i
-                                        class="fas fa-map-marked-alt"></i></h6>
-
+                                <h6 class="m-0 font-weight-bold text-primary">GPS Map
+                                    <i class="fas fa-map-marked-alt"></i>
+                                </h6>
                             </div>
                             <div class="card-body">
                                 <div class="chart-area" id="MAP"></div>
@@ -418,22 +421,23 @@
 </div>
 
 <!-- Bootstrap core JavaScript-->
-<script src="src/jquery.min.js"></script>
-<script src="src/bootstrap.bundle.min.js"></script>
+<script src="../src/jquery.min.js"></script>
+<script src="../src/bootstrap.bundle.min.js"></script>
 
 <!-- Core plugin JavaScript-->
-<script src="src/jquery.easing.min.js"></script>
+<script src="../src/jquery.easing.min.js"></script>
 
 <!-- Custom scripts for all pages-->
-<script src="src/sb-admin-2.min.js"></script>
+<script src="../src/sb-admin-2.min.js"></script>
 
 <!-- Page level plugins-->
-<script src="src/Chart.min.js"></script>
+<script src="../src/Chart.min.js"></script>
 <script src="https://webapi.amap.com/maps?v=1.4.15&key=ef216f9cacb4c9d778bf502ee958e8de"></script>
 
 <!-- Page level custom scripts-->
-<!-- <script src="src/setmap.js"></script>
-<script src="src/setecharts.js"></script> -->
+<script src="../src/setchart.js"></script>
+<script src="../src/setmap.js"></script>
 
 </body>
+
 </html>

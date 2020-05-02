@@ -13,7 +13,7 @@ app = Webserver.WebServant(static_path='/src', template_path='/www')
 def index(*arguments):
     client, address = arguments
     client.send(Webserver.header200())
-    with open('/www/index.html', 'rb') as f:
+    with open('www/index.html', 'rb') as f:
         line = f.read(8192)
         while line:
             client.send(line)

@@ -18,6 +18,8 @@ content-length: {3}
     Path = {'pms7003': '/info/sendair', 'gps': '/info/sendgps', 'voc': '/info/sendvoc'}
     Proto = 'http'
     Port = 80
+    total_num = 0
+    success_num = 0
 
     def __init__(self, conf):
         self.Proto = conf['Proto']
@@ -26,7 +28,7 @@ content-length: {3}
         self.Path = conf['Path']
         self.host = conf['host']
 
-    def do(self, UartRecv):
+    def send_json(self, UartRecv):
         # You must use getaddrinfo() even for numeric addresses 您必须使用getaddrinfo()，即使是用于数字型地址
         # [(2, 1, 0, 'www.example.com', ('12.34.56.78', 80))](family, type, proto, canonname, sockaddr)
         try:
@@ -48,14 +50,16 @@ content-length: {3}
                 s = ssl.wrap_socket(s)
             s.write(RequestHeader)
             s.write(UartRecv)
-            # print(s.readline())
+            if s.readline() == b'HTTP/1.1 200 OK\r\n':
+                self.success_num += 1
             # while True:
             #     h = s.readline()
             #     if h == b"" or h == b"\r\n":
             #         break
             #     print(h.decode())
         except Exception as e:
-            print('HttpRequest:', e)
+            print('WebClient:', e)
         finally:
             s.close()
             gc.collect()
+            self.total_num += 1
