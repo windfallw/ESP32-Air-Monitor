@@ -1,6 +1,6 @@
+from py import ssd1306
 import machine
 import network
-import ssd1306
 import json
 import time
 import dht
