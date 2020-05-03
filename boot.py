@@ -13,4 +13,4 @@ esp.osdebug(None)
 gc.enable()
 
 print(machine.freq())
-print("flash_size: {0}, flash_user_start: {1}.".format(esp.flash_size(),esp.flash_user_start()))
+print("flash_size: {0}, flash_user_start: {1}.".format(esp.flash_size(), esp.flash_user_start()))
