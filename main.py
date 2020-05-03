@@ -1,6 +1,4 @@
-import device
-import Webserver
-import Webclient
+from py import Webserver, Webclient, device
 import _thread
 import machine
 import time
@@ -97,12 +95,12 @@ def UART2():
 
 if __name__ == '__main__':
     External_Device = device.External()
+    WiFi = device.WiFi()
     External_Device.tim1.init(period=5000, mode=machine.Timer.PERIODIC,
                               callback=lambda t: External_Device.release_dht())  # 5秒读取一次dht
     External_Device.tim2.init(period=1000, mode=machine.Timer.PERIODIC,
                               callback=lambda t: External_Device.refresh_screen(WiFi.network_config))  # 1秒刷新一次oled
 
-    WiFi = device.WiFi()
     WiFi.tim0.init(period=60000, mode=machine.Timer.PERIODIC,
                    callback=lambda t: WiFi.check_wifi_disconnect())  # 检测WiFi是否断线,防止无限重连
 
