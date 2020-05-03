@@ -78,7 +78,7 @@ class WiFi:
         write_config()
 
 
-class devices:
+class External:
     tim1 = machine.Timer(1)
     tim2 = machine.Timer(2)
     humidity = 0
