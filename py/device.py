@@ -120,8 +120,6 @@ class External:
             js_loads['temperature'] = self.temperature
             PMS7003 = json.dumps(js_loads)
         elif js_loads['type'] == 'gps':
-            js_loads['lae2'] = 0
-            js_loads['loe2'] = 0
             GPS = json.dumps(js_loads)
         return js_loads
 

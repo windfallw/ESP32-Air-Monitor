@@ -87,23 +87,22 @@ def UART2():
         try:
             if uart2.any():
                 UartRecv = uart2.readline().decode()
-                request.send_json(External_Device.pack(UartRecv))
+                External_Device.pack(UartRecv)
+                # request.send_json(External_Device.pack(UartRecv))
         except Exception as e:
             print('UART2:', e)
         time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死
 
 
 if __name__ == '__main__':
-    External_Device = device.External()
     WiFi = device.WiFi()
+    # WiFi.tim0.init(period=60000, mode=machine.Timer.PERIODIC,
+    #                callback=lambda t: WiFi.check_wifi_disconnect())  # 检测WiFi是否断线,防止无限重连
+    External_Device = device.External()
     External_Device.tim1.init(period=5000, mode=machine.Timer.PERIODIC,
                               callback=lambda t: External_Device.release_dht())  # 5秒读取一次dht
     External_Device.tim2.init(period=1000, mode=machine.Timer.PERIODIC,
                               callback=lambda t: External_Device.refresh_screen(WiFi.network_config))  # 1秒刷新一次oled
-
-    WiFi.tim0.init(period=60000, mode=machine.Timer.PERIODIC,
-                   callback=lambda t: WiFi.check_wifi_disconnect())  # 检测WiFi是否断线,防止无限重连
-
     request = Webclient.HttpRequest(device.config['client_config'])
 
     print(app.route_table_get)

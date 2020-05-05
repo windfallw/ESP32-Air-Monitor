@@ -5,10 +5,12 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <title>ESP32-Web-Console</title>
 
     <!-- Custom fonts for this template-->
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+    <!--    <link rel="stylesheet" href="../src/all.min.css">-->
 
     <!-- Custom styles for this template-->
     <link rel="stylesheet" href="../src/sb-admin-2.min.css">
@@ -263,8 +265,7 @@
                     <div class="col-xl-8 col-lg-7">
                         <div class="card shadow mb-4">
                             <!-- Card Header - Dropdown -->
-                            <div
-                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <h6 class="m-0 font-weight-bold text-primary">PMS7003M</h6>
                                 <div class="dropdown no-arrow">
                                     <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink1"
@@ -295,23 +296,8 @@
                     <div class="col-xl-4 col-lg-5">
                         <div class="card shadow mb-4">
                             <!-- Card Header - Dropdown -->
-                            <div
-                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <h6 class="m-0 font-weight-bold text-primary">DHT11</h6>
-                                <div class="dropdown no-arrow">
-                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                                         aria-labelledby="dropdownMenuLink">
-                                        <div class="dropdown-header">Dropdown Header:</div>
-                                        <a class="dropdown-item" href="#">Action</a>
-                                        <a class="dropdown-item" href="#">Another action</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">Something else here</a>
-                                    </div>
-                                </div>
                             </div>
                             <!-- Card Body -->
                             <div class="card-body">
@@ -319,15 +305,12 @@
                                     <canvas id="PieChart"></canvas>
                                 </div>
                                 <div class="mt-4 text-center small">
-                                        <span class="mr-2">
-                                            <i class="fas fa-circle text-primary"></i> Direct
-                                        </span>
                                     <span class="mr-2">
-                                            <i class="fas fa-circle text-success"></i> Social
-                                        </span>
+                                        <i class="fas fa-tint text-info" id="humidity">湿度</i>
+                                    </span>
                                     <span class="mr-2">
-                                            <i class="fas fa-circle text-info"></i> Referral
-                                        </span>
+                                        <i class="fas fa-temperature-low text-danger" id="temper">温度</i>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -342,13 +325,28 @@
 
                         <!-- MAP Card -->
                         <div class="card shadow mb-4">
-                            <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">GPS Map
-                                    <i class="fas fa-map-marked-alt"></i>
-                                </h6>
+
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">GPS Map</h6>
+
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink2"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-map-marked-alt  text-gray-500"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                         aria-labelledby="dropdownMenuLink2">
+                                        <div class="dropdown-header">GPS设置</div>
+                                        <button class="dropdown-item" onclick="getGps();">定位一次</button>
+                                        <div class="dropdown-divider"></div>
+                                        <button class="dropdown-item" onclick="closeAutoGetGps();">关闭自动定位</button>
+                                    </div>
+                                </div>
+
                             </div>
+
                             <div class="card-body">
-                                <div class="chart-area" id="MAP"></div>
+                                <div class="chart-area" id="Map"></div>
                             </div>
                         </div>
 
@@ -362,8 +360,8 @@
                                 <h6 class="m-0 font-weight-bold text-primary">VOC Module</h6>
                             </div>
                             <div class="card-body">
-                                <div class="chart-area">
-
+                                <div class="chart-bar">
+                                    <canvas id="BarChart"></canvas>
                                 </div>
                             </div>
                         </div>
