@@ -134,7 +134,6 @@ class WebServant:
                 client_data = request_data.rsplit('\r\n', 1)[-1]  # 用户发送的数据
                 print(request_url, request_method, address, client)
                 flag = False
-
                 if request_method.upper() == 'GET':
                     for i in self.route_table_get:
                         path, func = i
@@ -155,11 +154,9 @@ class WebServant:
                         client.send(NotFound404)
                 else:
                     client.send(MethodNotAllowed405)
-
+                client.close()
             except Exception as e:
                 print('WebServant:', e)
-
             finally:
-                client.close()
                 gc.collect()
                 print('use:', gc.mem_alloc(), 'remain:', gc.mem_free())

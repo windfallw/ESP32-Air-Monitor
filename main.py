@@ -1,7 +1,6 @@
-from py import Webserver, Webclient, device
+from py import Webserver, device
 import _thread
 import machine
-import time
 import re
 
 app = Webserver.WebServant(static_path='/src', template_path='/www')
@@ -27,14 +26,21 @@ def index(*arguments):
 def infoair(*arguments):
     client, address = arguments
     client.send(Webserver.header200('json'))
-    client.send(device.PMS7003)
+    client.send(External_Device.PMS7003)
 
 
 @app.route('/info/gps')
 def infogps(*arguments):
     client, address = arguments
     client.send(Webserver.header200('json'))
-    client.send(device.GPS)
+    client.send(External_Device.GPS)
+
+
+@app.route('/info/voc')
+def infogps(*arguments):
+    client, address = arguments
+    client.send(Webserver.header200('json'))
+    client.send(External_Device.VOC)
 
 
 @app.route('/favicon.ico')
@@ -63,7 +69,7 @@ def postwifi(*arguments):
         return
     if WiFi.connect_wifi(ssid, pwd):
         client.send("<p>成功连接到 %s </p>" % ssid)
-        WiFi.save_wifi_config(ssid, pwd)
+        WiFi.save_wifi(ssid, pwd)
     else:
         client.send("<p>连接失败......你输入的密码是 %s</p>" % (pwd))
 
@@ -75,37 +81,28 @@ def posthost(*arguments):
     client.send("<p>正在设置中......</p>")
     obj2 = re.match(r'Host=(.*?)&Port=(.*)', client_data)
     host, port = obj2.group(1), int(obj2.group(2))
-    device.save_client_config(host, port)
+    device.save_client(host, port)
     client.send("<p>设置完毕......已自动重启</p>")
     client.close()
     machine.reset()
 
 
-def UART2():
-    uart2 = machine.UART(2, baudrate=115200, bits=8, rx=16, tx=17, stop=1, timeout=10)
-    while True:
-        try:
-            if uart2.any():
-                UartRecv = uart2.readline().decode()
-                External_Device.pack(UartRecv)
-                # request.send_json(External_Device.pack(UartRecv))
-        except Exception as e:
-            print('UART2:', e)
-        time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死
-
-
 if __name__ == '__main__':
+    tim0 = machine.Timer(0)
+    tim1 = machine.Timer(1)
+    tim2 = machine.Timer(2)
     WiFi = device.WiFi()
-    # WiFi.tim0.init(period=60000, mode=machine.Timer.PERIODIC,
-    #                callback=lambda t: WiFi.check_wifi_disconnect())  # 检测WiFi是否断线,防止无限重连
     External_Device = device.External()
-    External_Device.tim1.init(period=5000, mode=machine.Timer.PERIODIC,
-                              callback=lambda t: External_Device.release_dht())  # 5秒读取一次dht
-    External_Device.tim2.init(period=1000, mode=machine.Timer.PERIODIC,
-                              callback=lambda t: External_Device.refresh_screen(WiFi.network_config))  # 1秒刷新一次oled
-    request = Webclient.HttpRequest(device.config['client_config'])
+
+    # tim0.init(period=60000, mode=machine.Timer.PERIODIC,
+    #           callback=lambda t: WiFi.check_wifi_disconnect())  # 检测WiFi是否断线,防止无限重连
+    tim1.init(period=5000, mode=machine.Timer.PERIODIC,
+              callback=lambda t: External_Device.DHT())  # 5秒读取一次dht
+    tim2.init(period=1000, mode=machine.Timer.PERIODIC,
+              callback=lambda t: External_Device.Screen(WiFi.network_config))  # 1秒刷新一次oled
 
     print(app.route_table_get)
     print(app.route_table_post)
+
     _thread.start_new_thread(app.run, ('0.0.0.0', 80))  # 多线程运行webserver
-    _thread.start_new_thread(UART2, ())  # 接受串口数据
+    _thread.start_new_thread(External_Device.UART2, ())  # 接受串口数据
