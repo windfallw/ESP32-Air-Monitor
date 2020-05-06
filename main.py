@@ -16,10 +16,13 @@ def index(*arguments):
             client.send(line)
             line = f.read(8192)
         f.close()
-    # sids = station.scan()
-    # for i in sids:
-    #     client.send(i[0])
-    #     client.send('<br>')
+
+
+@app.route('/sysinfo')
+def infoair(*arguments):
+    client, address = arguments
+    client.send(Webserver.header200('json'))
+    client.send(device.getSystemInfo(WiFi.NetworkInfo, [External_Device.uartCount, External_Device.uartFail]))
 
 
 @app.route('/info/air')
@@ -99,10 +102,10 @@ if __name__ == '__main__':
     tim1.init(period=5000, mode=machine.Timer.PERIODIC,
               callback=lambda t: External_Device.DHT())  # 5秒读取一次dht
     tim2.init(period=1000, mode=machine.Timer.PERIODIC,
-              callback=lambda t: External_Device.Screen(WiFi.network_config))  # 1秒刷新一次oled
+              callback=lambda t: External_Device.Screen(WiFi.NetworkInfo['station']['network']))  # 1秒刷新一次oled
 
-    print(app.route_table_get)
-    print(app.route_table_post)
+    print(app.route_table_get, end='\n\n')
+    print(app.route_table_post, end='\n\n')
 
     _thread.start_new_thread(app.run, ('0.0.0.0', 80))  # 多线程运行webserver
     _thread.start_new_thread(External_Device.UART2, ())  # 接受串口数据

@@ -1,12 +1,16 @@
 from py import ssd1306, Webclient
 import machine
 import network
+import binascii
 import json
 import time
 import dht
+import esp32
+import gc
 
 config = {
-    'wifi': [{'ssid': 'example', 'password': 'yourpassword'}],
+    'wifi': {'station': [{'ssid': 'example', 'password': 'yourpassword'}],
+             'ap': {'essid': 'ESP32-Webconfig', 'password': '12345678', 'authmode': 4, 'channel': 11}},
     'client': {'proto': 'http', 'host': 'www.example.com', 'port': 80, 'method': 'POST',
                'path': {'pms7003': '/info/sendair', 'gps': '/info/sendgps', 'voc': '/info/sendvoc'}}
 }
@@ -43,6 +47,31 @@ read_config()
 request = Webclient.HttpRequest(config['client'])
 
 
+def getSystemInfo(NetworkInfo, uart):
+    CPU_freq = machine.freq()
+    CPU_temper = (esp32.raw_temperature() - 32) / 1.8
+    # TSENS 值是一个字节，范围是 0 - 255，其数值变化和环境温度变化近似成线性关系，用户需要自己定义和测量其对应的外界温度值。
+    hall = esp32.hall_sensor()  # 霍尔传感器的原始值
+    allocRAM = gc.mem_alloc()
+    freeRAM = gc.mem_free()
+    systemInfo = {
+        'networkinfo': NetworkInfo,
+        'config': config,
+        'sys': {'freq': CPU_freq, 'temper': CPU_temper, 'hall': hall, 'alloc': allocRAM, 'free': freeRAM},
+        'log': {'OK200': request.requestSuccess, 'uart': uart}
+    }
+    return json.dumps(systemInfo)
+
+
+# STAT_IDLE -- 没有连接，没有活动-1000
+# STAT_CONNECTING -- 正在连接-1001
+# STAT_WRONG_PASSWORD -- 由于密码错误而失败-202
+# STAT_NO_AP_FOUND -- 失败，因为没有接入点回复,201
+# STAT_GOT_IP -- 连接成功-1010
+# STAT_ASSOC_FAIL -- 203
+# STAT_BEACON_TIMEOUT -- 超时-200
+# STAT_HANDSHAKE_TIMEOUT -- 握手超时-204
+
 # wdt = machine.WDT(timeout=30000)#看门dog
 # machine.reset()重启
 # wdt.feed()
@@ -52,21 +81,43 @@ class WiFi:
     mask = "0.0.0.0"
     gateway = "0.0.0.0"
     dns = "0.0.0.0"
-    network_config = (ip, mask, gateway, dns)
-    wifi = []
+    wifi = []  # 暂存config里的WiFi设置
     station = network.WLAN(network.STA_IF)
     ap = network.WLAN(network.AP_IF)
+    NetworkInfo = {
+        'station': {'network': (ip, mask, gateway, dns), 'rssi': 0, 'status': 0, 'mac': '', 'isconnect': False},
+        'ap': {'network': (), 'mac': ''},
+        'scan': []
+    }
 
     def __init__(self):
         self.load_wifi()
         self.ap.active(True)
-        self.ap.config(essid="ESP32-Webconfig", authmode=4, password="12345678")  # authmode=network.AUTH_WPA_WPA2_PSK=4
+        self.ap.config(essid="ESP32-Webconfig", authmode=4, password="12345678",
+                       channel=11)  # authmode=network.AUTH_WPA_WPA2_PSK=4 channel最好选择1 6 11
 
-    def check_wifi_disconnect(self):
-        if not self.station.isconnected():
-            self.station.disconnect()
+    def WiFiStatus(self):
+        self.NetworkInfo['station']['network'] = self.station.ifconfig()
+        self.ip, self.mask, self.gateway, self.dns = self.NetworkInfo['station']['network']
+        self.NetworkInfo['station']['status'] = self.station.status()
+        self.NetworkInfo['station']['rssi'] = self.station.status('rssi')
+        self.NetworkInfo['station']['mac'] = binascii.hexlify(self.station.config('mac'), ':').decode()
+        self.NetworkInfo['station']['isconnect'] = self.station.isconnected()
+        self.NetworkInfo['ap']['network'] = self.ap.ifconfig()
+        self.NetworkInfo['ap']['mac'] = binascii.hexlify(self.ap.config('mac'), ':').decode()
+
+    def ScanWifi(self):
+        aps = self.station.scan()
+        scan = []
+        for ap in aps:
+            ssid = ap[0].decode()
+            mac = binascii.hexlify(ap[1], ':').decode()
+            scan.append([ssid, mac, ap[2], ap[3], ap[4], ap[5]])  # [ssid，bssid，channel，RSSI，authmode，hidden]
+        self.NetworkInfo['scan'] = scan
+        return scan
 
     def connect_wifi(self, sid, pwd):
+        self.station.disconnect()
         self.station.connect(sid, pwd)
         try:
             for s in range(0, 50):  # i 0-49
@@ -77,19 +128,18 @@ class WiFi:
                     print("Connection successful")
                     return True
         finally:
-            self.network_config = self.station.ifconfig()
-            self.ip, self.mask, self.gateway, self.dns = self.station.ifconfig()
+            self.WiFiStatus()
         self.station.disconnect()
         print("out of 5s connect fail......")
         return False
 
     def load_wifi(self):
-        self.wifi = config['wifi']
+        self.wifi = config['wifi']['station']
         self.station.active(True)
-        ssids = self.station.scan()
+        ssids = self.ScanWifi()
         for i in self.wifi:
             for j in ssids:
-                if j[0].decode() == i['ssid']:
+                if j[0] == i['ssid']:
                     if self.connect_wifi(i['ssid'], i['password']):
                         return
 
@@ -100,13 +150,15 @@ class WiFi:
                 write_config()
                 return
         self.wifi.append({'ssid': sid, 'password': pwd})
-        config['wifi'] = self.wifi
+        config['wifi']['station'] = self.wifi
         write_config()
 
 
 class External:
     humidity = 0
     temperature = 0
+    uartCount = 0
+    uartFail = 0
     PMS7003 = '{"Gt0_3um":0,"Gt0_5um":0,"Gt10um":0,"Gt1_0um":0,"Gt2_5um":0,"Gt5_0um":0,"PM10AE":0,"PM10CF1":0,"PM1_0AE":0,"PM1_0CF1":0,"PM2_5AE":0,"PM2_5CF1":0,"humidity":0,"temperature":0,"type":"pms7003"}'
     GPS = '{"day":0,"hour":0,"lae1":0,"lae2":0,"loe1":0,"loe2":0,"minute":0,"month":0,"sec":0,"type":"gps","year":2020}'
     VOC = '{"CH2O":0,"CO2":0,"VOC":0,"type":"voc"}'
@@ -117,8 +169,8 @@ class External:
         self.dht11 = dht.DHT11(machine.Pin(25))
         self.uart2 = machine.UART(2, baudrate=115200, bits=8, rx=16, tx=17, stop=1, timeout=10)
 
-    def Screen(self, network_config):
-        ip, mask, gateway, dns = network_config
+    def Screen(self, networkinfo):
+        ip, mask, gateway, dns = networkinfo
         try:
             self.oled.fill(0)
             self.oled.text("Temperature:%s'C" % self.temperature, 0, 0, 1)  # Celsius ℃
@@ -143,6 +195,7 @@ class External:
         while True:
             try:
                 if self.uart2.any():
+                    self.uartCount += 1
                     UartRecv = self.uart2.readline().decode()
                     data = json.loads(UartRecv)
                     if data['type'] == 'pms7003':
@@ -151,15 +204,15 @@ class External:
                         self.PMS7003 = json.dumps(data)
                         request.send_json(self.PMS7003, config['client']['path'][data['type']])
                     elif data['type'] == 'gps':
-                        self.GPS = json.dumps(data)
+                        self.GPS = UartRecv
                         # request.send_json(self.GPS, config['client']['path'][data['type']])
                     elif data['type'] == 'voc':
-                        self.VOC = json.dumps(data)
+                        self.VOC = UartRecv
                         request.send_json(self.VOC, config['client']['path'][data['type']])
                     else:
                         raise Exception("无法识别的类型")
             except ValueError:
-                pass
+                self.uartFail += 1
             except Exception as e:
                 print('UART2:', e)
             time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死
