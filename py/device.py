@@ -10,7 +10,7 @@ import gc
 
 config = {
     'wifi': {'station': [{'ssid': 'example', 'password': 'yourpassword'}],
-             'ap': {'essid': 'ESP32-Webconfig', 'password': '12345678', 'authmode': 4, 'channel': 11}},
+             'ap': {'essid': 'ESP32-Webconfig', 'password': '12345678', 'authmode': 4}},
     'client': {'proto': 'http', 'host': 'www.example.com', 'port': 80, 'method': 'POST',
                'path': {'pms7003': '/info/sendair', 'gps': '/info/sendgps', 'voc': '/info/sendvoc'}}
 }
@@ -48,7 +48,7 @@ request = Webclient.HttpRequest(config['client'])
 
 
 def getSystemInfo(NetworkInfo, uart):
-    CPU_freq = machine.freq()
+    CPU_freq = machine.freq()  # frequency must be 20MHz, 40MHz, 80Mhz, 160MHz or 240MHz
     CPU_temper = (esp32.raw_temperature() - 32) / 1.8
     # TSENS 值是一个字节，范围是 0 - 255，其数值变化和环境温度变化近似成线性关系，用户需要自己定义和测量其对应的外界温度值。
     hall = esp32.hall_sensor()  # 霍尔传感器的原始值
@@ -86,8 +86,9 @@ class WiFi:
     station = network.WLAN(network.STA_IF)
     ap = network.WLAN(network.AP_IF)
     NetworkInfo = {
-        'station': {'network': (ip, mask, gateway, dns), 'rssi': 0, 'status': 0, 'mac': '', 'isconnect': False},
-        'ap': {'network': (), 'mac': ''},
+        'station': {'network': (ip, mask, gateway, dns), 'essid': '', 'rssi': 0, 'status': 0, 'mac': '',
+                    'isconnect': False},
+        'ap': {'network': (), 'mac': '', 'essid': '', 'authmode': None},
         'scan': []
     }
 
@@ -95,8 +96,8 @@ class WiFi:
         self.station.active(True)
         self.loadExistWiFi()  # 在加载类的时候顺便自动连接已知的WIFI
         self.ap.active(True)
-        self.ap.config(essid="ESP32-Webconfig", authmode=4, password="12345678",
-                       channel=11)  # authmode=network.AUTH_WPA_WPA2_PSK=4 channel最好选择1 6 11
+        self.ap.config(essid="ESP32-Webconfig", authmode=4,
+                       password="12345678")  # authmode=network.AUTH_WPA_WPA2_PSK=4 channel最好选择1 6 11
 
     def interruptWiFi(self):
         if not self.RefreshWiFiStatus:
@@ -108,12 +109,16 @@ class WiFi:
         self.NetworkInfo['station']['status'] = self.station.status()
         if self.station.isconnected():
             self.NetworkInfo['station']['isconnect'] = True
+            self.NetworkInfo['station']['essid'] = self.station.config('essid')
             self.NetworkInfo['station']['rssi'] = self.station.status('rssi')
         else:
             self.NetworkInfo['station']['isconnect'] = False
+            self.NetworkInfo['station']['essid'] = ''
             self.NetworkInfo['station']['rssi'] = 0
         self.NetworkInfo['station']['mac'] = binascii.hexlify(self.station.config('mac'), ':').decode()
         self.NetworkInfo['ap']['network'] = self.ap.ifconfig()
+        self.NetworkInfo['ap']['essid'] = self.ap.config('essid')
+        self.NetworkInfo['ap']['authmode'] = self.ap.config('authmode')
         self.NetworkInfo['ap']['mac'] = binascii.hexlify(self.ap.config('mac'), ':').decode()
 
     def ScanWiFi(self):
@@ -229,6 +234,7 @@ class External:
                         request.send_json(self.PMS7003, config['client']['path'][data['type']])
                     elif data['type'] == 'gps':
                         self.GPS = json.dumps(data)
+                        # STC8串口发送的json字符串带有\r\n这里也可以写成UartRecv.replace('\r\n', ''),务必去除\r\n否则js识别不出json格式
                         # request.send_json(self.GPS, config['client']['path'][data['type']])
                     elif data['type'] == 'voc':
                         self.VOC = json.dumps(data)
