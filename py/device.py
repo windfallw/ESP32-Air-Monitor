@@ -58,7 +58,7 @@ def getSystemInfo(NetworkInfo, uart):
         'networkinfo': NetworkInfo,
         'config': config,
         'sys': {'freq': CPU_freq, 'temper': CPU_temper, 'hall': hall, 'alloc': allocRAM, 'free': freeRAM},
-        'log': {'OK200': request.requestSuccess, 'uart': uart}
+        'log': {'OK200': [request.requestCount, request.requestSuccess], 'uart': uart}
     }
     return json.dumps(systemInfo)
 
@@ -73,7 +73,6 @@ def getSystemInfo(NetworkInfo, uart):
 # STAT_HANDSHAKE_TIMEOUT -- 握手超时-204
 
 # wdt = machine.WDT(timeout=30000)#看门dog
-# machine.reset()重启
 # wdt.feed()
 
 class WiFi:
@@ -81,7 +80,9 @@ class WiFi:
     mask = "0.0.0.0"
     gateway = "0.0.0.0"
     dns = "0.0.0.0"
-    wifi = []  # 暂存config里的WiFi设置
+    RefreshWiFiStatus = False
+    RefreshWiFiList = False
+    wifi = config['wifi']['station']  # config里的WiFi设置
     station = network.WLAN(network.STA_IF)
     ap = network.WLAN(network.AP_IF)
     NetworkInfo = {
@@ -91,22 +92,31 @@ class WiFi:
     }
 
     def __init__(self):
-        self.load_wifi()
+        self.station.active(True)
+        self.loadExistWiFi()  # 在加载类的时候顺便自动连接已知的WIFI
         self.ap.active(True)
         self.ap.config(essid="ESP32-Webconfig", authmode=4, password="12345678",
                        channel=11)  # authmode=network.AUTH_WPA_WPA2_PSK=4 channel最好选择1 6 11
+
+    def interruptWiFi(self):
+        if not self.RefreshWiFiStatus:
+            self.RefreshWiFiStatus = True
 
     def WiFiStatus(self):
         self.NetworkInfo['station']['network'] = self.station.ifconfig()
         self.ip, self.mask, self.gateway, self.dns = self.NetworkInfo['station']['network']
         self.NetworkInfo['station']['status'] = self.station.status()
-        self.NetworkInfo['station']['rssi'] = self.station.status('rssi')
+        if self.station.isconnected():
+            self.NetworkInfo['station']['isconnect'] = True
+            self.NetworkInfo['station']['rssi'] = self.station.status('rssi')
+        else:
+            self.NetworkInfo['station']['isconnect'] = False
+            self.NetworkInfo['station']['rssi'] = 0
         self.NetworkInfo['station']['mac'] = binascii.hexlify(self.station.config('mac'), ':').decode()
-        self.NetworkInfo['station']['isconnect'] = self.station.isconnected()
         self.NetworkInfo['ap']['network'] = self.ap.ifconfig()
         self.NetworkInfo['ap']['mac'] = binascii.hexlify(self.ap.config('mac'), ':').decode()
 
-    def ScanWifi(self):
+    def ScanWiFi(self):
         aps = self.station.scan()
         scan = []
         for ap in aps:
@@ -116,34 +126,36 @@ class WiFi:
         self.NetworkInfo['scan'] = scan
         return scan
 
-    def connect_wifi(self, sid, pwd):
+    def ConnectWiFi(self, sid, pwd):
         self.station.disconnect()
-        self.station.connect(sid, pwd)
         try:
+            self.station.connect(sid, pwd)
             for s in range(0, 50):  # i 0-49
                 if not self.station.isconnected():
                     time.sleep(0.1)
                 else:
-                    self.save_wifi(sid, pwd)
+                    self.SaveWiFi(sid, pwd)
                     print("Connection successful")
                     return True
+        except Exception as e:
+            self.station.disconnect()
+            print('WiFi:', e)
+            return False
         finally:
             self.WiFiStatus()
         self.station.disconnect()
         print("out of 5s connect fail......")
         return False
 
-    def load_wifi(self):
-        self.wifi = config['wifi']['station']
-        self.station.active(True)
-        ssids = self.ScanWifi()
+    def loadExistWiFi(self):
+        ssids = self.ScanWiFi()
         for i in self.wifi:
             for j in ssids:
                 if j[0] == i['ssid']:
-                    if self.connect_wifi(i['ssid'], i['password']):
+                    if self.ConnectWiFi(i['ssid'], i['password']):
                         return
 
-    def save_wifi(self, sid, pwd):
+    def SaveWiFi(self, sid, pwd):
         for i in self.wifi:
             if sid == i['ssid']:
                 i['password'] = pwd
@@ -158,7 +170,9 @@ class External:
     humidity = 0
     temperature = 0
     uartCount = 0
-    uartFail = 0
+    uartSuccess = 0
+    RefreshDHT = False
+    RefreshOLED = False
     PMS7003 = '{"Gt0_3um":0,"Gt0_5um":0,"Gt10um":0,"Gt1_0um":0,"Gt2_5um":0,"Gt5_0um":0,"PM10AE":0,"PM10CF1":0,"PM1_0AE":0,"PM1_0CF1":0,"PM2_5AE":0,"PM2_5CF1":0,"humidity":0,"temperature":0,"type":"pms7003"}'
     GPS = '{"day":0,"hour":0,"lae1":0,"lae2":0,"loe1":0,"loe2":0,"minute":0,"month":0,"sec":0,"type":"gps","year":2020}'
     VOC = '{"CH2O":0,"CO2":0,"VOC":0,"type":"voc"}'
@@ -168,6 +182,14 @@ class External:
         self.oled = ssd1306.SSD1306_I2C(128, 64, self.i2c)
         self.dht11 = dht.DHT11(machine.Pin(25))
         self.uart2 = machine.UART(2, baudrate=115200, bits=8, rx=16, tx=17, stop=1, timeout=10)
+
+    def interruptDHT(self):
+        if not self.RefreshDHT:
+            self.RefreshDHT = True
+
+    def interruptOLED(self):
+        if not self.RefreshOLED:
+            self.RefreshOLED = True
 
     def Screen(self, networkinfo):
         ip, mask, gateway, dns = networkinfo
@@ -181,13 +203,15 @@ class External:
             self.oled.text(gateway, 0, 52, 1)
             self.oled.show()
         except Exception as e:
-            print('Oled:', e)
+            print('OLED:', e)
 
     def DHT(self):
         try:
             self.dht11.measure()
             self.humidity = self.dht11.humidity()
             self.temperature = self.dht11.temperature()
+        except OSError:
+            pass
         except Exception as e:
             print('DHT11:', e)
 
@@ -204,15 +228,17 @@ class External:
                         self.PMS7003 = json.dumps(data)
                         request.send_json(self.PMS7003, config['client']['path'][data['type']])
                     elif data['type'] == 'gps':
-                        self.GPS = UartRecv
+                        self.GPS = json.dumps(data)
                         # request.send_json(self.GPS, config['client']['path'][data['type']])
                     elif data['type'] == 'voc':
-                        self.VOC = UartRecv
+                        self.VOC = json.dumps(data)
                         request.send_json(self.VOC, config['client']['path'][data['type']])
                     else:
                         raise Exception("无法识别的类型")
+                    self.uartSuccess += 1
+                else:
+                    time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死
             except ValueError:
-                self.uartFail += 1
+                pass
             except Exception as e:
                 print('UART2:', e)
-            time.sleep_ms(50)  # 不加延迟且串口没有收到数据的时候会卡死

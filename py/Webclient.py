@@ -17,6 +17,7 @@ content-length: {3}
     host = 'www.example.com'
     port = 80
     sockinfotmp = ()  # 暂存域名解析信息，防止域名解析失败后无法建立请求
+    requestCount = 0
     requestSuccess = 0
 
     def __init__(self, config):
@@ -29,6 +30,7 @@ content-length: {3}
         # You must use getaddrinfo() even for numeric addresses 您必须使用getaddrinfo()，即使是用于数字型地址
         # [(2, 1, 0, 'www.example.com', ('12.34.56.78', 80))](family, type, proto, canonname, sockaddr)
         try:
+            self.requestCount += 1
             try:
                 sockinfo = socket.getaddrinfo(self.host, self.port)[0]
                 self.sockinfotmp = sockinfo
