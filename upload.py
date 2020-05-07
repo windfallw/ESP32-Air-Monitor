@@ -27,6 +27,8 @@ def uploadFolder(folderPath, folderDest=None):
 
 
 if __name__ == '__main__':
+    print('\033[1m')
+
     device = 'COM7'
     pyb = pyboard.Pyboard(device)
     pyb.enter_raw_repl()
@@ -46,20 +48,30 @@ if __name__ == '__main__':
     except pyboard.PyboardError as e:
         print('pyboard.PyboardError:', e)
 
-    print('ALL file')
+    print('\nALL file')
     pyb.fs_ls('/')
-    print('py Folder')
+    print('\npy Folder')
     pyb.fs_ls('py')
-    print('www Folder')
-    pyb.fs_ls('www')
-    print('src Folder')
+    print('\nsrc Folder')
     pyb.fs_ls('src')
+    print('\nwww Folder')
+    pyb.fs_ls('www')
+
+    # pyb.fs_rm('config.json')
 
     # uploadFile('boot.py')
-    # uploadFile('main.py')
-    uploadFolder('py/')
-    # uploadFolder('www/')
+    uploadFile('main.py')
+    uploadFile('py/device.py')
+    # uploadFile('py/Webclient.py')
+    # uploadFile('py/Webserver.py')
+
+    # uploadFile('www/index.html')
+    # uploadFile('src/setchart.js')
+    # uploadFile('src/setmap.js')
+
+    # uploadFolder('py/')
     # uploadFolder('src/')
+    # uploadFolder('www/')
 
     pyb.exit_raw_repl()
     pyb.close()
