@@ -10,8 +10,6 @@
 
     <!-- Custom fonts for this template-->
     <link href="../src/font.css" rel="stylesheet">
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
-    <!--    <link rel="stylesheet" href="../src/all.min.css">-->
 
     <!-- Custom styles for this template-->
     <link href="../src/sb-admin-2.min.css" rel="stylesheet">
@@ -27,7 +25,7 @@
         <!-- Sidebar - Brand -->
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
             <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-laugh-wink"></i>
+                <i class="iconfont icon-setting"></i>
             </div>
             <div class="sidebar-brand-text mx-3">ESP32控制台</div>
         </a>
@@ -38,75 +36,49 @@
         <!-- Nav Item - Dashboard -->
         <li class="nav-item active">
             <a class="nav-link" href="index.html">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <i class="iconfont icon-yibiaopan"></i>
                 <span>监控面板</span></a>
         </li>
-
         <!-- Divider -->
         <hr class="sidebar-divider">
-
-        <!-- Heading -->
-        <div class="sidebar-heading">
-            Interface
-        </div>
-
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                aria-expanded="true" aria-controls="collapseTwo">
-                <i class="fas fa-fw fa-cog"></i>
+                <i class="iconfont icon-shezhi"></i>
                 <span>系统设置</span>
             </a>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Custom Components:</h6>
+                    <a class="collapse-item" href="#">Buttons</a>
+                    <a class="collapse-item" href="#">Cards</a>
+                </div>
+            </div>
         </li>
-
         <!-- Nav Item - Utilities Collapse Menu -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-               aria-expanded="true" aria-controls="collapseUtilities">
-                <i class="fas fa-fw fa-wrench"></i>
+            <a class="nav-link collapsed" href="#">
+                <i class="iconfont icon-banshou"></i>
                 <span>Debug</span>
             </a>
         </li>
-
         <!-- Divider -->
         <hr class="sidebar-divider">
-
-        <!-- Heading -->
-        <div class="sidebar-heading">
-            Addons
-        </div>
-
         <!-- Nav Item - Pages -->
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
                aria-expanded="true" aria-controls="collapsePages">
-                <i class="fas fa-fw fa-folder"></i>
+                <i class="iconfont icon-folder"></i>
                 <span>Pages</span>
             </a>
         </li>
-
-        <!-- Nav Item - Charts -->
-        <li class="nav-item">
-            <a class="nav-link" href="#">
-                <i class="fas fa-fw fa-chart-area"></i>
-                <span>Charts</span></a>
-        </li>
-
-        <!-- Nav Item - Tables -->
-        <li class="nav-item">
-            <a class="nav-link" href="#">
-                <i class="fas fa-fw fa-table"></i>
-                <span>Tables</span></a>
-        </li>
-
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">
-
         <!-- Sidebar Toggler (Sidebar) -->
         <div class="text-center d-none d-md-inline">
             <button class="rounded-circle border-0" id="sidebarToggle"></button>
         </div>
-
     </ul>
     <!-- End of Sidebar -->
 
@@ -120,13 +92,27 @@
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
                 <!-- Sidebar Toggle (Topbar) -->
-                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3"
+                        style="text-decoration:none;">
+                    <i class="iconfont icon-bar"></i>
                 </button>
 
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
-                    <div class="topbar-divider d-none d-sm-block"></div>
+                    <li class="nav-item no-arrow">
+                        <a class="nav-link" href="#">
+                            <i class="iconfont icon-cpu-temper text-gray-600"></i>
+                            <span class="ml-2 d-lg-inline text-gray-600 small" id="cpuTemper">读取中</span>
+                        </a>
+                    </li>
+                    <li class="nav-item no-arrow">
+                        <a class="nav-link" href="#">
+                            <i class="iconfont icon-hall text-gray-600"></i>
+                            <span class="ml-2 d-lg-inline text-gray-600 small" id="Hall">读取中</span>
+                        </a>
+                    </li>
+
+                    <div class="topbar-divider d-sm-block"></div>
 
                     <!-- Nav Item - WiFi Information -->
                     <li class="nav-item dropdown no-arrow">
@@ -140,16 +126,16 @@
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                              aria-labelledby="wifiDropdown">
                             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#stationModal">
-                                <i class="iconfont icon-station  mr-2 text-gray-400"></i>
+                                <i class="iconfont icon-station  mr-2 text-gray-600"></i>
                                 Station
                             </a>
                             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#apModal">
-                                <i class="iconfont icon-ap  mr-2 text-gray-400"></i>
+                                <i class="iconfont icon-ap  mr-2 text-gray-600"></i>
                                 Access Point
                             </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#resetModal">
-                                <i class="fas fa-power-off fa-sm fa-fw mr-2 text-gray-400"></i>
+                                <i class="iconfont icon-chongqi mr-2 text-gray-600"></i>
                                 重启
                             </a>
                         </div>
@@ -183,7 +169,7 @@
                                         <div class="h5 mb-0 font-weight-bold text-gray-800" id="freq">读取中......</div>
                                     </div>
                                     <div class="col-auto">
-                                        <i class="fas fa-microchip fa-2x text-gray-300"></i>
+                                        <i class="iconfont icon-cpu text-gray-200" style="font-size: 32px;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -217,7 +203,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <i class="fas fa-memory fa-2x text-gray-300"></i>
+                                        <i class="iconfont icon-neicun text-gray-200" style="font-size: 32px;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -236,7 +222,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <i class="fas fa-plug fa-2x text-gray-300"></i>
+                                        <i class="iconfont icon-chuankou text-gray-300" style="font-size: 32px;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -256,7 +242,7 @@
                                         </div>
                                     </div>
                                     <div class="col-auto">
-                                        <i class="fab fa-battle-net fa-2x text-gray-300"></i>
+                                        <i class="iconfont icon-http text-gray-300" style="font-size: 32px;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -268,7 +254,7 @@
 
                 <div class="row">
 
-                    <!-- Air EChart -->
+                    <!-- Air Chart -->
                     <div class="col-xl-8 col-lg-7">
                         <div class="card shadow mb-4">
                             <!-- Card Header - Dropdown -->
@@ -276,8 +262,9 @@
                                 <h6 class="m-0 font-weight-bold text-primary">PMS7003M</h6>
                                 <div class="dropdown no-arrow">
                                     <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink1"
-                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                       style="text-decoration:none;">
+                                        <i class="iconfont icon-ellipsis text-gray-400"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                          aria-labelledby="dropdownMenuLink1">
@@ -299,7 +286,7 @@
                         </div>
                     </div>
 
-                    <!-- DHT11 EChart -->
+                    <!-- DHT11 Pie -->
                     <div class="col-xl-4 col-lg-5">
                         <div class="card shadow mb-4">
                             <!-- Card Header - Dropdown -->
@@ -313,10 +300,10 @@
                                 </div>
                                 <div class="mt-4 text-center small">
                                     <span class="mr-2">
-                                        <i class="fas fa-tint text-info" id="humidity">湿度</i>
+                                        <i class="iconfont icon-shidu text-info" id="humidity">湿度</i>
                                     </span>
                                     <span class="mr-2">
-                                        <i class="fas fa-temperature-low text-danger" id="temper">温度</i>
+                                        <i class="iconfont icon-wendu text-danger" id="temper">温度</i>
                                     </span>
                                 </div>
                             </div>
@@ -330,7 +317,7 @@
                     <!-- Content Column -->
                     <div class="col-lg-6 mb-4">
 
-                        <!-- MAP Card -->
+                        <!-- Map Card -->
                         <div class="card shadow mb-4">
 
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -339,7 +326,7 @@
                                 <div class="dropdown no-arrow">
                                     <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink2"
                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-map-marked-alt  text-gray-500"></i>
+                                        <i class="iconfont icon-map text-gray-500"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                          aria-labelledby="dropdownMenuLink2">
@@ -385,8 +372,8 @@
         <footer class="sticky-footer bg-white">
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
-                    <a class="nav-link" href="https://github.com/windfallw" role="button" target="_blank">
-                        <i class="fab fa-github text-dark" aria-hidden="true" style="font-size:24px;"></i>
+                    <a href="https://github.com/windfallw" role="button" target="_blank" style="text-decoration:none;">
+                        <i class="iconfont icon-GitHub text-dark" aria-hidden="true" style="font-size:24px;"></i>
                     </a>
                     <span>Copyright &copy; 2020 ESP32-Web-Console by windfallw</span>
                 </div>
@@ -401,10 +388,36 @@
 <!-- End of Page Wrapper -->
 
 <!-- Scroll to Top Button-->
-<a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
+<a class="scroll-to-top rounded" href="#page-top" style="text-decoration:none;">
+    <i class="iconfont icon-up"></i>
 </a>
 
+<!--Station Info Modal-->
+<div class="modal fade" id="stationModal" tabindex="-1" role="dialog" aria-labelledby="stationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stationModalLabel">ESP32 WiFi Station</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="stationInfo">
+                <p class="text-gray-900">当前连接WiFi的名称: 读取中</p>
+                <p class="text-gray-900">WiFi信号强度: 读取中</p>
+                <p class="text-gray-900">IP: 读取中</p>
+                <p class="text-gray-900">子网掩码: 读取中</p>
+                <p class="text-gray-900">网关: 读取中</p>
+                <p class="text-gray-900">DNS服务器: 读取中</p>
+                <p class="text-gray-900">Station MAC地址: 读取中</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!--AP Info Modal-->
 <div class="modal fade" id="apModal" tabindex="-1" role="dialog" aria-labelledby="apModalLabel"
@@ -433,32 +446,6 @@
     </div>
 </div>
 
-
-<!--Station Info Modal-->
-<div class="modal fade" id="stationModal" tabindex="-1" role="dialog" aria-labelledby="stationModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="stationModalLabel">ESP32 WiFi Station</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body" id="stationInfo">
-                <p class="text-gray-900">IP: 读取中</p>
-                <p class="text-gray-900">子网掩码: 读取中</p>
-                <p class="text-gray-900">网关: 读取中</p>
-                <p class="text-gray-900">DNS服务器: 读取中</p>
-                <p class="text-gray-900">Station MAC地址: 读取中</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!--reset Modal-->
 <div class="modal fade" id="resetModal" tabindex="-1" role="dialog" aria-labelledby="resetModalLabel"
      aria-hidden="true">
@@ -470,7 +457,7 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <div class="modal-body">点击确定将重启ESP32，重启后会自动连接保存的WiFi</div>
+            <div class="modal-body">点击确定将重启ESP32，重启后会自动连接已保存的WiFi</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
                 <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="machineReset();">确定</button>
@@ -494,9 +481,9 @@
 <script src="https://webapi.amap.com/maps?v=1.4.15&key=ef216f9cacb4c9d778bf502ee958e8de"></script>
 
 <!-- Page level custom scripts-->
-<script src="../src/core.js"></script>
 <script src="../src/setchart.js"></script>
 <script src="../src/setmap.js"></script>
+<script src="../src/core.js"></script>
 
 </body>
 

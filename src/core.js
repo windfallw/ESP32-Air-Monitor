@@ -1,3 +1,7 @@
+//方便本地调试
+// let serverAddress = 'http://192.168.31.100/';
+let serverAddress='';
+
 let authmode = {
     AUTH_OPEN: 0,
     AUTH_WEP: 1,
@@ -6,11 +10,12 @@ let authmode = {
     AUTH_WPA_WPA2_PSK: 4,
     AUTH_MAX: 6
 };
+let scan = [];
 
 function getSys() {
     $.ajax({
         type: "get",
-        url: "sysinfo",
+        url: serverAddress + "sysinfo",
         data: {},
         dataType: 'json',
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
@@ -35,6 +40,8 @@ function getSys() {
         let networkInfo = d.networkinfo;
         let log = d.log;
         let config = d.config;
+        scan = d.networkinfo.scan;
+        showTemperAndHall([temper, hall]);
         showWiFiStatus(networkInfo.station);
         showStationInfo(networkInfo.station);
         showApInfo(networkInfo.ap);
@@ -44,10 +51,15 @@ function getSys() {
     }
 }
 
+function showTemperAndHall(obj) {
+    $('#cpuTemper').text(obj[0] + '℃');
+    $('#Hall').text(obj[1]);
+}
+
 function machineReset() {
     $.ajax({
         type: "post",
-        url: "reset",
+        url: serverAddress + "reset",
         data: 'reset',
         dataType: 'text',
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
@@ -65,8 +77,25 @@ function machineReset() {
     }
 
     function succFunction(d) {
+        console.log(d);
         if (d === 'reset') console.log('服务器已响应重启命令');
     }
+}
+
+function showStationInfo(station) {
+    let essid = station.essid;
+    let rssi = station.rssi;
+    let mac = station.mac;
+    let network = station.network;
+    let str = '';
+    str += '<p class="text-gray-900">当前连接WiFi的名称: ' + essid + '</p>';
+    str += '<p class="text-gray-900">WiFi信号强度: ' + rssi + ' dBm</p>';
+    str += '<p class="text-gray-900">IP: ' + network[0] + '</p>';
+    str += '<p class="text-gray-900">子网掩码: ' + network[1] + '</p>';
+    str += '<p class="text-gray-900">网关: ' + network[2] + '</p>';
+    str += '<p class="text-gray-900">DNS服务器: ' + network[3] + '</p>';
+    str += '<p class="text-gray-900">Station MAC地址: ' + mac + '</p>';
+    $('#stationInfo').html(str);
 }
 
 function showApInfo(ap) {
@@ -90,24 +119,11 @@ function showApInfo(ap) {
     $('#apInfo').html(str);
 }
 
-
-function showStationInfo(station) {
-    let mac = station.mac;
-    let network = station.network;
-    let str = '';
-    str += '<p class="text-gray-900">IP: ' + network[0] + '</p>';
-    str += '<p class="text-gray-900">子网掩码: ' + network[1] + '</p>';
-    str += '<p class="text-gray-900">网关: ' + network[2] + '</p>';
-    str += '<p class="text-gray-900">DNS服务器: ' + network[3] + '</p>';
-    str += '<p class="text-gray-900">Station MAC地址: ' + mac + '</p>';
-    $('#stationInfo').html(str);
-}
-
-function showWiFiStatus(networkInfo) {
-    let isconnect = networkInfo.isconnect;
-    let status = networkInfo.status;
-    let rssi = networkInfo.rssi;
-    let essid = networkInfo.essid;
+function showWiFiStatus(station) {
+    let isconnect = station.isconnect;
+    let status = station.status;
+    let rssi = station.rssi;
+    let essid = station.essid;
     let span = $('#essid');
     let icon = $('#wifiIcon');
     if (isconnect) {
@@ -147,5 +163,11 @@ function showUartHttpCount(log) {
 }
 
 
+getAir();
+getVoc();
+getGps();
 getSys();
+setInterval(getAir, 3000);
+setInterval(getVoc, 3000);
+autoGetGps = setInterval(getGps, 3000);
 setInterval(getSys, 5000)

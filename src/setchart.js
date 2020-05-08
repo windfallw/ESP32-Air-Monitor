@@ -181,7 +181,7 @@ function updatePieChart(chart, data) {
     $('#humidity').text('湿度: ' + data[0] + '%');
     if (data[1] > 32) {
         let i = $('#temper');
-        i.attr('class', 'fas fa-temperature-high text-danger');
+        i.attr('class', 'iconfont icon-wendugao text-danger');
         i.text('温度: ' + data[1] + '℃');
     } else $('#temper').text('温度: ' + data[1] + '℃');
 }
@@ -211,7 +211,7 @@ let time = [];
 function getAir() {
     $.ajax({
         type: "get",
-        url: "/info/air",
+        url: serverAddress + "info/air",
         data: {},
         dataType: 'json',
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
@@ -273,9 +273,6 @@ function getAir() {
 }
 
 //------------- ajax request -------------
-
-getAir();
-setInterval(getAir, 3000);
 
 //------------- Bar Chart -------------
 
@@ -357,7 +354,7 @@ let vocData;
 function getVoc() {
     $.ajax({
         type: "get",
-        //   url: "/info/voc",
+        // url: serverAddress + "info/voc",
         url: "https://my-iot.site/info/voc",
         data: {},
         dataType: 'json',
@@ -390,6 +387,3 @@ function getVoc() {
 }
 
 //------------- Bar Chart -------------
-
-getVoc();
-setInterval(getVoc, 3000);

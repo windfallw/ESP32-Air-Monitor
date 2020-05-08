@@ -1,5 +1,6 @@
 let gpsData;
 let markArry = [];
+let autoGetGps;
 let mapOption = {
     zoom: 15,
     mapStyle: 'amap://styles/blue',
@@ -46,7 +47,7 @@ function convert(gps) {
 function getGps() {
     $.ajax({
         type: "get",
-        url: "/info/gps",
+        url: serverAddress + "info/gps",
         data: {},
         dataType: 'json',
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
@@ -80,9 +81,6 @@ function getGps() {
         convert([loe, lae]);
     }
 }
-
-getGps();
-let autoGetGps = setInterval(getGps, 3000);
 
 function closeAutoGetGps() {
     clearInterval(autoGetGps);
