@@ -1,11 +1,11 @@
 from py import ssd1306, Webclient
+import binascii
 import machine
 import network
-import binascii
+import esp32
 import json
 import time
 import dht
-import esp32
 import gc
 
 config = {
@@ -49,8 +49,7 @@ request = Webclient.HttpRequest(config['client'])
 
 def getSystemInfo(NetworkInfo, uart):
     CPU_freq = machine.freq()  # frequency must be 20MHz, 40MHz, 80Mhz, 160MHz or 240MHz
-    CPU_temper = (esp32.raw_temperature() - 32) / 1.8
-    # TSENS 值是一个字节，范围是 0 - 255，其数值变化和环境温度变化近似成线性关系，用户需要自己定义和测量其对应的外界温度值。
+    CPU_temper = esp32.raw_temperature()  # TSENS 值是一个字节，范围是 0 - 255，其数值变化和环境温度变化近似成线性关系，用户需要自己定义和测量其对应的外界温度值。
     hall = esp32.hall_sensor()  # 霍尔传感器的原始值
     allocRAM = gc.mem_alloc()
     freeRAM = gc.mem_free()

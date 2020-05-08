@@ -61,13 +61,16 @@ if __name__ == '__main__':
 
     # uploadFile('boot.py')
     uploadFile('main.py')
-    uploadFile('py/device.py')
+    # uploadFile('py/device.py')
+
     # uploadFile('py/Webclient.py')
-    # uploadFile('py/Webserver.py')
+    uploadFile('py/Webserver.py')
 
     # uploadFile('www/index.html')
     # uploadFile('src/setchart.js')
     # uploadFile('src/setmap.js')
+    uploadFile('src/core.js')
+    # uploadFile('src/font.css')
 
     # uploadFolder('py/')
     # uploadFolder('src/')

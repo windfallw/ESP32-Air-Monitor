@@ -22,7 +22,7 @@ def index(*arguments):
 
 
 @app.route('/sysinfo')
-def infoair(*arguments):
+def sysinfo(*arguments):
     client, address = arguments
     client.send(Webserver.header200('json'))
     client.send(device.getSystemInfo(WiFi.NetworkInfo, [External_Device.uartCount, External_Device.uartSuccess]))
@@ -43,7 +43,7 @@ def infogps(*arguments):
 
 
 @app.route('/info/voc')
-def infogps(*arguments):
+def infovoc(*arguments):
     client, address = arguments
     client.send(Webserver.header200('json'))
     client.send(External_Device.VOC)
@@ -59,6 +59,16 @@ def favoicon(*arguments):
             client.send(line)
             line = f.read(8192)
         f.close()
+
+
+@app.route('/reset', 'post')
+def reset(*arguments):
+    client, address, client_data = arguments
+    if client_data == 'reset':
+        client.send(Webserver.header200('text'))
+        client.send('reset')
+        client.close()
+        machine.reset()
 
 
 @app.route('/postwifi', 'POST')

@@ -78,6 +78,7 @@ function setAreaChart(ctx, config, title, unit) {
             pointHoverRadius: 3,
             pointHoverBackgroundColor: d.color,
             pointHoverBorderColor: d.color,
+            data: [0],
         });
     });
     return new Chart(ctx, Area_chart_template);
@@ -227,9 +228,7 @@ function getAir() {
     }
 
     function succFunction(d) {
-        if (airData === JSON.stringify(d)) {
-            return;
-        }
+        if (airData === JSON.stringify(d)) return;
         airData = JSON.stringify(d);
         //限制长度避免浏览器过卡
         if (time.length >= 50) {
@@ -275,6 +274,7 @@ function getAir() {
 
 //------------- ajax request -------------
 
+getAir();
 setInterval(getAir, 3000);
 
 //------------- Bar Chart -------------
@@ -288,19 +288,19 @@ let Bar_Chart = new Chart(Bar_ctx, {
             label: "ECO₂(ppm)",
             backgroundColor: 'rgba(255, 99, 132,0.5)',
             borderColor: 'rgba(255, 99, 132,1)',
-            borderWidth:2,
+            borderWidth: 2,
             data: [],
         }, {
             label: "VOC(ppb)",
             backgroundColor: 'rgba(54, 162, 235,0.5)',
             borderColor: 'rgba(54, 162, 235,1)',
-            borderWidth:2,
+            borderWidth: 2,
             data: [],
         }, {
             label: "CH₂O(ppb)",
             backgroundColor: 'rgba(255, 159, 64,0.5)',
             borderColor: 'rgba(255, 159, 64,1)',
-            borderWidth:2,
+            borderWidth: 2,
             data: [],
         }]
     },
@@ -375,9 +375,7 @@ function getVoc() {
     }
 
     function succFunction(d) {
-        if (vocData === JSON.stringify(d)) {
-            return;
-        }
+        if (vocData === JSON.stringify(d)) return;
         if (ECO2.length >= 50) {
             ECO2.shift();
             VOC.shift();
@@ -393,4 +391,5 @@ function getVoc() {
 
 //------------- Bar Chart -------------
 
+getVoc();
 setInterval(getVoc, 3000);

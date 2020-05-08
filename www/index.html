@@ -9,11 +9,12 @@
     <title>ESP32-Web-Console</title>
 
     <!-- Custom fonts for this template-->
+    <link href="../src/font.css" rel="stylesheet">
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
     <!--    <link rel="stylesheet" href="../src/all.min.css">-->
 
     <!-- Custom styles for this template-->
-    <link rel="stylesheet" href="../src/sb-admin-2.min.css">
+    <link href="../src/sb-admin-2.min.css" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -125,29 +126,29 @@
 
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
-
                     <div class="topbar-divider d-none d-sm-block"></div>
 
-                    <!-- Nav Item - User Information -->
+                    <!-- Nav Item - WiFi Information -->
                     <li class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                        <a class="nav-link dropdown-toggle" href="#" id="wifiDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-wifi text-dark" aria-hidden="true" style="font-size:24px;"></i>
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="essid">读取中</span>
+                            <i class="iconfont icon-wifi-disabled text-gray-600" id="wifiIcon"></i>
                         </a>
-                        <!-- Dropdown - User Information -->
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                             aria-labelledby="userDropdown">
 
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                WiFi设置
+                        <!-- Dropdown - WiFi Information -->
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                             aria-labelledby="wifiDropdown">
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#stationModal">
+                                <i class="iconfont icon-station  mr-2 text-gray-400"></i>
+                                Station
                             </a>
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                系统设置
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#apModal">
+                                <i class="iconfont icon-ap  mr-2 text-gray-400"></i>
+                                Access Point
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#resetModal">
                                 <i class="fas fa-power-off fa-sm fa-fw mr-2 text-gray-400"></i>
                                 重启
                             </a>
@@ -179,7 +180,7 @@
                                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                             CPU工作频率
                                         </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">24000000</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="freq">读取中......</div>
                                     </div>
                                     <div class="col-auto">
                                         <i class="fas fa-microchip fa-2x text-gray-300"></i>
@@ -195,18 +196,22 @@
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1"
+                                             id="ramText">
                                             内存使用情况
                                         </div>
                                         <div class="row no-gutters align-items-center">
                                             <div class="col-auto">
-                                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
+                                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"
+                                                     id="ramPercent">读取中
+                                                </div>
                                             </div>
                                             <div class="col">
                                                 <div class="progress progress-sm mr-2">
-                                                    <div class="progress-bar bg-info" role="progressbar"
-                                                         style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                                                         aria-valuemax="100"></div>
+                                                    <div class="progress-bar bg-info progress-bar-striped progress-bar-animated"
+                                                         role="progressbar"
+                                                         style="width: 0" aria-valuenow="0" aria-valuemin="0"
+                                                         aria-valuemax="100" id="ramProgress"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -225,9 +230,10 @@
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">串口处理次数
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">串口处理成功次数
                                         </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">1000</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="uartCount">读取中......
+                                        </div>
                                     </div>
                                     <div class="col-auto">
                                         <i class="fas fa-plug fa-2x text-gray-300"></i>
@@ -246,7 +252,8 @@
                                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                             HTTP请求成功次数
                                         </div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">100</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="httpCount">读取中......
+                                        </div>
                                     </div>
                                     <div class="col-auto">
                                         <i class="fab fa-battle-net fa-2x text-gray-300"></i>
@@ -381,7 +388,7 @@
                     <a class="nav-link" href="https://github.com/windfallw" role="button" target="_blank">
                         <i class="fab fa-github text-dark" aria-hidden="true" style="font-size:24px;"></i>
                     </a>
-                    <span>Copyright &copy; 2020 ESP32-Web-Console</span>
+                    <span>Copyright &copy; 2020 ESP32-Web-Console by windfallw</span>
                 </div>
             </div>
         </footer>
@@ -398,13 +405,67 @@
     <i class="fas fa-angle-up"></i>
 </a>
 
-<!--reset Modal-->
-<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+
+<!--AP Info Modal-->
+<div class="modal fade" id="apModal" tabindex="-1" role="dialog" aria-labelledby="apModalLabel"
      aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">确定要重启?</h5>
+                <h5 class="modal-title" id="apModalLabel">ESP32 WiFi Access Point</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="apInfo">
+                <p class="text-gray-900">AP热点名称: 读取中</p>
+                <p class="text-gray-900">认证模式: 读取中</p>
+                <p class="text-gray-900">IP: 读取中</p>
+                <p class="text-gray-900">子网掩码: 读取中</p>
+                <p class="text-gray-900">网关: 读取中</p>
+                <p class="text-gray-900">DNS服务器: 读取中</p>
+                <p class="text-gray-900">Access Point MAC地址: 读取中</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Station Info Modal-->
+<div class="modal fade" id="stationModal" tabindex="-1" role="dialog" aria-labelledby="stationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stationModalLabel">ESP32 WiFi Station</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="stationInfo">
+                <p class="text-gray-900">IP: 读取中</p>
+                <p class="text-gray-900">子网掩码: 读取中</p>
+                <p class="text-gray-900">网关: 读取中</p>
+                <p class="text-gray-900">DNS服务器: 读取中</p>
+                <p class="text-gray-900">Station MAC地址: 读取中</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--reset Modal-->
+<div class="modal fade" id="resetModal" tabindex="-1" role="dialog" aria-labelledby="resetModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetModalLabel">确定要重启?</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -412,7 +473,7 @@
             <div class="modal-body">点击确定将重启ESP32，重启后会自动连接保存的WiFi</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
-                <button class="btn btn-primary" type="button" data-dismiss="modal">确定</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="machineReset();">确定</button>
             </div>
         </div>
     </div>
@@ -433,6 +494,7 @@
 <script src="https://webapi.amap.com/maps?v=1.4.15&key=ef216f9cacb4c9d778bf502ee958e8de"></script>
 
 <!-- Page level custom scripts-->
+<script src="../src/core.js"></script>
 <script src="../src/setchart.js"></script>
 <script src="../src/setmap.js"></script>
 

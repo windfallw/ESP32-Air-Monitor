@@ -44,9 +44,6 @@ function convert(gps) {
 }
 
 function getGps() {
-    let lae, loe;
-    let lae1, lae2, loe1, loe2, day, month, year;
-    let laeloe = [0, 0];
     $.ajax({
         type: "get",
         url: "/info/gps",
@@ -66,23 +63,25 @@ function getGps() {
     }
 
     function succFunction(d) {
-        if (gpsData === JSON.stringify(d)) {
-            return;
-        }
+        if (gpsData === JSON.stringify(d)) return;
+        let time;
+        let lae, loe;
+        let day, month, year, hour, minute, sec;
         gpsData = JSON.stringify(d);
         day = d.day;
         month = d.month;
         year = d.year;
-        lae1 = parseInt(d.lae1);
-        lae2 = parseFloat(d.lae2);
-        loe1 = parseInt(d.loe1);
-        loe2 = parseFloat(d.loe2);
-        laeloe[1] = lae = lae1 + lae2 / 60; //纬度
-        laeloe[0] = loe = loe1 + loe2 / 60; //经度
-        convert(laeloe);
+        hour = d.hour;
+        minute = d.minute;
+        sec = d.sec
+        lae = d.lae1 + d.lae2 / 60; //纬度
+        loe = d.loe1 + d.loe2 / 60; //经度
+        time = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + sec;
+        convert([loe, lae]);
     }
 }
 
+getGps();
 let autoGetGps = setInterval(getGps, 3000);
 
 function closeAutoGetGps() {

@@ -44,7 +44,8 @@ data_type = {
     'css': 'text/css',
     'js': 'application/javascript',
     'json': 'application/json',
-    'ico': 'image/x-icon'
+    'ico': 'image/x-icon',
+    'text': 'text/plain'
 }
 
 
@@ -132,7 +133,7 @@ class WebServant:
                 request_head, request_data = client.recv(1024).decode().split('\r\n', 1)  # 处理http请求头分割成请求部分和数据部分
                 request_method, request_url, request_version = request_head.split(' ', 2)  # 将请求方法 请求路径 http版本分割出来
                 client_data = request_data.rsplit('\r\n', 1)[-1]  # 用户发送的数据
-                print(request_url, request_method, address, client)
+                # print(request_url, request_method, address)
                 flag = False
                 if request_method.upper() == 'GET':
                     for i in self.route_table_get:
@@ -159,4 +160,3 @@ class WebServant:
                 print('WebServant:', e)
             finally:
                 gc.collect()
-                print('use:', gc.mem_alloc(), 'remain:', gc.mem_free())
