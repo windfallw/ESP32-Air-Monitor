@@ -19,6 +19,14 @@ Server: ESP32-Webserver
 
 '''
 
+BadRequest400 = '''
+HTTP/1.0 400 Bad Request
+Content-Type: text/html;charset=utf-8
+Access-Control-Allow-Origin: *
+Server: ESP32-Webserver
+
+'''
+
 NotFound404 = '''
 HTTP/1.0 404 NOT FOUND
 Content-Type: text/html;charset=utf-8
