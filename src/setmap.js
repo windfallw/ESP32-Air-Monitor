@@ -61,9 +61,11 @@ function getGps() {
     }
 
     function erryFunction() {
+        serverResponse(this.url + ' -> Fail', true);
     }
 
     function succFunction(d) {
+        serverResponse(this.url + ' -> Success');
         if (gpsData === JSON.stringify(d)) return;
         let time;
         let lae, loe;

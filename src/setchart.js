@@ -206,6 +206,7 @@ let humidity = [];
 let temper = [];
 
 let airData;
+let now = new Date();
 let time = [];
 
 function getAir() {
@@ -225,9 +226,11 @@ function getAir() {
     }
 
     function erryFunction() {
+        serverResponse(this.url + ' -> Fail', true);
     }
 
     function succFunction(d) {
+        serverResponse(this.url + ' -> Success');
         if (airData === JSON.stringify(d)) return;
         airData = JSON.stringify(d);
         //限制长度避免浏览器过卡
@@ -248,7 +251,7 @@ function getAir() {
             humidity.shift();
             temper.shift();
         }
-        let now = new Date();
+        now = new Date();
         time.push(now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds());
         PM1_0CF1.push(d.PM1_0CF1);
         PM2_5CF1.push(d.PM2_5CF1);
@@ -369,9 +372,11 @@ function getVoc() {
     }
 
     function erryFunction() {
+        serverResponse(this.url + ' -> Fail', true);
     }
 
     function succFunction(d) {
+        serverResponse(this.url + ' -> Success');
         if (vocData === JSON.stringify(d)) return;
         if (ECO2.length >= 50) {
             ECO2.shift();

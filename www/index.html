@@ -10,7 +10,7 @@
 
     <!-- Custom fonts for this template-->
     <link href="../src/font.css" rel="stylesheet">
-
+    <link href="../src/ubuntuMono.css" rel="stylesheet">
     <!-- Custom styles for this template-->
     <link href="../src/sb-admin-2.min.css" rel="stylesheet">
 </head>
@@ -34,33 +34,25 @@
         <hr class="sidebar-divider my-0">
 
         <!-- Nav Item - Dashboard -->
-        <li class="nav-item active">
-            <a class="nav-link" href="index.html">
+        <li class="nav-item">
+            <a class="nav-link" href="#" id="board">
                 <i class="iconfont icon-yibiaopan"></i>
                 <span>监控面板</span></a>
         </li>
         <!-- Divider -->
         <hr class="sidebar-divider">
-        <!-- Nav Item - Pages Collapse Menu -->
+        <!-- Nav Item - Charts -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-               aria-expanded="true" aria-controls="collapseTwo">
-                <i class="iconfont icon-shezhi"></i>
-                <span>系统设置</span>
+            <a class="nav-link collapsed" href="#" id="table">
+                <i class="iconfont icon-table"></i>
+                <span>表格</span>
             </a>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <h6 class="collapse-header">Custom Components:</h6>
-                    <a class="collapse-item" href="#">Buttons</a>
-                    <a class="collapse-item" href="#">Cards</a>
-                </div>
-            </div>
         </li>
-        <!-- Nav Item - Utilities Collapse Menu -->
+        <!-- Nav Item - setting -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#">
-                <i class="iconfont icon-banshou"></i>
-                <span>Debug</span>
+            <a class="nav-link collapsed" href="#" id="setting">
+                <i class="iconfont icon-shezhi"></i>
+                <span>设置</span>
             </a>
         </li>
         <!-- Divider -->
@@ -72,6 +64,13 @@
                 <i class="iconfont icon-folder"></i>
                 <span>Pages</span>
             </a>
+            <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">备用网页:</h6>
+                    <a class="collapse-item" href="config.html">config.html</a>
+                    <a class="collapse-item" href="#">404.html</a>
+                </div>
+            </div>
         </li>
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">
@@ -151,7 +150,7 @@
 
                 <!-- Page Heading -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">监控面板</h1>
+                    <h1 class="h3 mb-0 text-gray-800" id="heading">监控面板</h1>
                 </div>
 
                 <!-- Content Row -->
@@ -252,7 +251,8 @@
 
                 <!-- Content Row -->
 
-                <div class="row">
+                <!-- Board Row 1-->
+                <div class="row" id="boardRow1">
 
                     <!-- Air Chart -->
                     <div class="col-xl-8 col-lg-7">
@@ -310,9 +310,10 @@
                         </div>
                     </div>
                 </div>
+                <!-- Board Row 1-->
 
-                <!-- Content Row -->
-                <div class="row">
+                <!-- Board Row 2-->
+                <div class="row" id="boardRow2">
 
                     <!-- Content Column -->
                     <div class="col-lg-6 mb-4">
@@ -361,6 +362,145 @@
                         </div>
                     </div>
                 </div>
+                <!-- Board Row 2-->
+
+                <!-- Setting Row 1-->
+                <div class="row" id="settingRow1">
+
+                    <div class="col-lg-4">
+                        <!-- WiFi Connect -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-primary">连接WiFi</h6>
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" data-toggle="modal" data-target="#scanModal"
+                                       role="button" style="text-decoration:none;">
+                                        <i class="iconfont icon-scan text-gray-600"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form class="user" id="wifiForm" action="postwifi" method="post">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control form-control-user" list="ssids"
+                                               name="ssid" placeholder="WIFI名称" required>
+                                        <datalist id="ssids"></datalist>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control form-control-user"
+                                               name="pwd" placeholder="WIFI密码" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">连接</button>
+                                </form>
+                                <hr>
+                            </div>
+                        </div>
+                        <!-- Host modify -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">修改服务器配置</h6>
+                            </div>
+                            <div class="card-body">
+                                <form class="user" id="hostForm" action="posthost" method="post">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control form-control-user" name="Host"
+                                               placeholder="服务器域名或IP" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" class="form-control form-control-user" name="Port"
+                                               min="1" max="65535" placeholder="服务器端口" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">提交</button>
+                                </form>
+                                <hr>
+                            </div>
+                        </div>
+                        <!-- config info -->
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Accordion -->
+                            <a href="#configCollapseCard" class="d-block card-header py-3" data-toggle="collapse"
+                               role="button" aria-expanded="true" aria-controls="configCollapseCard">
+                                <h6 class="m-0 font-weight-bold text-primary">系统保存的配置信息</h6>
+                            </a>
+                            <!-- Card Content - Collapse -->
+                            <div class="collapse show" id="configCollapseCard">
+                                <div class="card-body">
+                                    <h2>Station&AccessPoint</h2>
+                                    <ul class="list-unstyled">
+                                        <li>已保存的WiFi
+                                            <ul id="savedWiFi">
+                                                <li>读取中</li>
+                                            </ul>
+                                        </li>
+                                        <li>AP配置
+                                            <ul id="AP">
+                                                <li>读取中</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <h2>Client</h2>
+                                    <ul class="list-unstyled">
+                                        <li>服务器
+                                            <ul id="server">
+                                                <li>读取中</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <!-- WiFi Scan -->
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Accordion -->
+                            <a href="#scanCollapseCard" class="d-block card-header py-3" data-toggle="collapse"
+                               role="button" aria-expanded="true" aria-controls="ScanCollapseCard">
+                                <h6 class="m-0 font-weight-bold text-primary">扫描到的WiFi</h6>
+                            </a>
+                            <!-- Card Content - Collapse -->
+                            <div class="collapse show" id="scanCollapseCard">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover" style="text-align: center;">
+                                            <thead class="thead-dark">
+                                            <tr>
+                                                <th>SSID</th>
+                                                <th>MAC</th>
+                                                <th>RSSI</th>
+                                                <th>Authmode</th>
+                                                <th>Channel</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="scan"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- log -->
+                        <div class="card shadow mb-4">
+                            <!-- Card Header - Accordion -->
+                            <a href="#logCollapseCard" class="d-block card-header py-3" data-toggle="collapse"
+                               role="button" aria-expanded="true" aria-controls="logCollapseCard">
+                                <h6 class="m-0 font-weight-bold text-primary">服务器响应记录</h6>
+                            </a>
+                            <!-- Card Content - Collapse -->
+                            <div class="collapse show" id="logCollapseCard">
+                                <div class="card-body embed-responsive embed-responsive-1by1">
+                                    <div class="embed-responsive-item" style="padding: 15px;">
+<pre style="background-color: #1e1e1e; font-family: 'Ubuntu Mono', monospace; color: #FAFAFA; padding: 15px 10px; height: 100%; white-space: pre-wrap; word-wrap: break-word;
+" id="response">
+</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Setting Row 1-->
 
             </div>
             <!-- /.container-fluid -->
@@ -372,8 +512,10 @@
         <footer class="sticky-footer bg-white">
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
-                    <a href="https://github.com/windfallw" role="button" target="_blank" style="text-decoration:none;">
-                        <i class="iconfont icon-GitHub text-dark" aria-hidden="true" style="font-size:24px;"></i>
+                    <a href="https://github.com/windfallw" role="button" target="_blank"
+                       style="text-decoration:none;">
+                        <i class="iconfont icon-GitHub text-dark" aria-hidden="true"
+                           style="font-size:24px;"></i>
                     </a>
                     <span>Copyright &copy; 2020 ESP32-Web-Console by windfallw</span>
                 </div>
@@ -460,7 +602,29 @@
             <div class="modal-body">点击确定将重启ESP32，重启后会自动连接已保存的WiFi</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
-                <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="machineReset();">确定</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="machine('reset');">确定
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--scan Modal-->
+<div class="modal fade" id="scanModal" tabindex="-1" role="dialog" aria-labelledby="scanModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scanModalLabel">扫描周围WiFi?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">点击确定将扫描周围WiFi,占用性能较多可能出现卡顿</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="machine('scan');">确定
+                </button>
             </div>
         </div>
     </div>
