@@ -61,46 +61,52 @@ def favoicon(*arguments):
         f.close()
 
 
-@app.route('/reset', 'post')
-def reset(*arguments):
+@app.route('/machine', 'post')
+def machineCtl(*arguments):
     client, address, client_data = arguments
     if client_data == 'reset':
         client.send(Webserver.header200('text'))
-        client.send('reset')
+        client.send(client_data)
         client.close()
         machine.reset()
+    elif client_data == 'scan':
+        client.send(Webserver.header200('text'))
+        client.send(client_data)
+        client.close()
+        WiFi.RefreshWiFiList = True
+    else:
+        client.send(Webserver.BadRequest400)
 
 
 @app.route('/postwifi', 'POST')
 def postwifi(*arguments):
     client, address, client_data = arguments
-    client.send(Webserver.header200())
-    client.send("<p>连接中......</p>")
+    client.send(Webserver.header200('text'))
+    client.send("正在连接中......")
     obj1 = re.match(r'ssid=(.*?)&pwd=(.*)', client_data)
     ssid, pwd = obj1.group(1), obj1.group(2)
     if not re.match('192.168.4', address[0]):
-        client.send("<p>当前访问IP是 %s ,WIFI连接过程中将中断Web服务,连接结果看OLED屏</p>" % (address[0]))
+        client.send("当前访问IP是 %s,WIFI连接过程中将中断Web服务,连接结果请看OLED屏或web是否刷新" % (address[0]))
         client.close()
         WiFi.ConnectWiFi(ssid, pwd)
         return
     if WiFi.ConnectWiFi(ssid, pwd):
-        client.send("<p>成功连接到 %s </p>" % ssid)
+        client.send("成功连接到 %s" % ssid)
         WiFi.SaveWiFi(ssid, pwd)
     else:
-        client.send("<p>连接失败......你输入的密码是 %s</p>" % (pwd))
+        client.send("连接失败你输入的密码是 %s" % (pwd))
 
 
 @app.route('/posthost', 'POST')
 def posthost(*arguments):
     client, address, client_data = arguments
-    client.send(Webserver.header200())
-    client.send("<p>正在设置中......</p>")
+    client.send(Webserver.header200('text'))
+    client.send("正在设置中......")
     obj2 = re.match(r'Host=(.*?)&Port=(.*)', client_data)
     host, port = obj2.group(1), int(obj2.group(2))
     device.save_client(host, port)
-    client.send("<p>设置完毕......已自动重启</p>")
+    client.send("设置完毕下次重启生效")
     client.close()
-    machine.reset()
 
 
 def Refresh():
