@@ -5,7 +5,7 @@
 
 - 有关*STC8*如何采集空气质量的请查看此[项目](https://github.com/windfallw/STC8-Airsensor)
 
-## System Desigin
+## System Design
 
  总共运行了三个线程
 
@@ -61,7 +61,9 @@ def machineCtl(*arguments):
  - 每次处理web请求后都会调用`gc.collect()`释放内存；
  
  ```python
- _thread.start_new_thread(app.run, ('0.0.0.0', 80)) # 建议使用线程运行
+print(app.route_table_get) # GET路由表
+print(app.route_table_post) # POST路由表
+_thread.start_new_thread(app.run, ('0.0.0.0', 80)) # 建议使用线程运行
  ```
 
 - - -
@@ -125,3 +127,13 @@ def Refresh():
 
 - WIFI配置及相关系统设置的保存暂时存储在`flash/config.json`下未来可能会尝试使用`btree`数据库实现
 
+## Web Design
+
+ - 网页开发使用的相关技术
+    
+   - 基于*Bootstrap*的*SB-Admin-2*框架
+   - 图表的绘制使用*Chart.js*
+   - GPS地图使用了[*高德地图API*](https://lbs.amap.com/)
+   - 网页图标使用的是阿里的 [*Icon Font*](https://www.iconfont.cn/)
+  
+  更多内容还在添加中 
