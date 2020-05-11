@@ -68,7 +68,7 @@ def header200(data_type_key='html'):
 class WebServant:
     route_table_get = []
     route_table_post = []
-    autoload_allow_staticfiletype = ['js', 'css']
+    static_file_type = ['js', 'css']
 
     def __init__(self, static_path=None, template_path=None):
         """
@@ -80,7 +80,7 @@ class WebServant:
             static_file = os.listdir()
             for i in static_file:
                 type = i.rsplit('.')[-1]
-                if type not in self.autoload_allow_staticfiletype:
+                if type not in self.static_file_type:
                     continue
                 file_path = static_path + '/' + i
                 self.add_file_to_route(file_path, file_path, type)
