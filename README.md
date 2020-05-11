@@ -57,8 +57,8 @@ def machineCtl(*arguments):
 
  *Attention*
  
- - 目前仅支持GET和POST方法的请求, 响应头仅实现了部分, 如有需求请自行添加
- - 每次处理web请求后都会调用`gc.collect()`释放内存
+ - 目前仅支持GET和POST方法的请求, 响应头仅实现了部分, 如有需求请自行添加；
+ - 每次处理web请求后都会调用`gc.collect()`释放内存；
  
  ```python
  _thread.start_new_thread(app.run, ('0.0.0.0', 80)) # 建议使用线程运行
@@ -66,10 +66,62 @@ def machineCtl(*arguments):
 
 - - -
 
-**2. 第一个线程是WebServer线程提供了Web服务**
+**2. 第二个线程是串口接收数据并传送到服务器数据库保存**
 
+- 读取STC8发送的的**JSON**格式数据解析后与DHT11采集的温湿度一同打包上传到服务器, 同时本地保留供Web服务调用；
  
- 
- 
+- 因为该部分代码不具有可重用性所以不做过多的介绍;
 
+- - -
+
+**3. 第三个线程涉及到的功能较多确保了ESP32的稳定运行**
+
+- 首先此线程涉及到三个定时器的运作
+
+```python
+    tim0 = machine.Timer(0)
+    tim1 = machine.Timer(1)
+    tim2 = machine.Timer(2)
+    tim0.init(period=10000, mode=machine.Timer.PERIODIC,
+              callback=lambda t: WiFi.interruptWiFi())  # 10秒读取一次WiFi状态,断线自动重连
+    tim1.init(period=5000, mode=machine.Timer.PERIODIC,
+              callback=lambda t: External_Device.interruptDHT())  # 5秒读取一次dht
+    tim2.init(period=1000, mode=machine.Timer.PERIODIC,
+              callback=lambda t: External_Device.interruptOLED())  # 1秒刷新一次OLED
+```
+ 
+ - 这些回调函数会将对应设备的中断标志设置为`True`，而此线程则负责扫描中断标志并执行相应的操作
+  
+   - DHT11的温湿度采集
+   
+   - OLED屏的刷新
+   
+   - WIFI状态的检测
+   
+     - 刷新WIFI状态获取相关参数供Web服务调用
+     - 如果检测到WIFI中断则会自动连接已保存的WIFI
+     - 响应服务器的`scan`扫描WIFI请求 (需要注意的是扫描WIFI时线程可能会受影响)
+   
+ ```python
+def Refresh():
+    while True:
+        if External_Device.RefreshDHT:
+            External_Device.RefreshDHT = False
+            External_Device.DHT()
+        if External_Device.RefreshOLED:
+            External_Device.RefreshOLED = False
+            External_Device.Screen(WiFi.NetworkInfo['station']['network'])
+        if WiFi.RefreshWiFiStatus:
+            WiFi.RefreshWiFiStatus = False
+            WiFi.WiFiStatus()
+            if WiFi.station.status() not in [1001, 1010]:
+                print('WiFiStatus:', WiFi.station.status())
+                WiFi.loadExistWiFi()
+        if WiFi.RefreshWiFiList:
+            WiFi.RefreshWiFiList = False
+            WiFi.ScanWiFi()
+        time.sleep_ms(50)  # 找点事做防止线程卡死循环
+```
+
+- WIFI配置及相关系统设置的保存暂时存储在`flash/config.json`下未来可能会尝试使用`btree`数据库实现
 
