@@ -2,33 +2,29 @@ import socket
 import os
 import gc
 
-Icon200 = '''
-HTTP/1.0 200 OK
-accept-ranges: bytes
+Icon200 = '''HTTP/1.0 200 OK
 content-type: image/x-icon
+accept-ranges: bytes
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
 
 '''
 
-OK200 = '''
-HTTP/1.0 200 OK
+OK200 = '''HTTP/1.0 200 OK
 Content-Type: {0};charset=utf-8
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
 
 '''
 
-BadRequest400 = '''
-HTTP/1.0 400 Bad Request
+BadRequest400 = '''HTTP/1.0 400 Bad Request
 Content-Type: text/html;charset=utf-8
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
 
 '''
 
-NotFound404 = '''
-HTTP/1.0 404 NOT FOUND
+NotFound404 = '''HTTP/1.0 404 NOT FOUND
 Content-Type: text/html;charset=utf-8
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
@@ -39,8 +35,7 @@ Server: ESP32-Webserver
 Welcome to->MY GITHUB</a>
 '''
 
-MethodNotAllowed405 = '''
-HTTP/1.0 405 Method Not Allowed
+MethodNotAllowed405 = '''HTTP/1.0 405 Method Not Allowed
 Content-Type: text/html;charset=utf-8
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
