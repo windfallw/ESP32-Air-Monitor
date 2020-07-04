@@ -3,6 +3,8 @@
 
 - ESP32通过串口接收来自STC8的空气质量数据, 并提供网页服务来供使用者监控当前空气质量
 
+![devices](images\devices.jpg)
+
 - 有关*STC8*如何采集空气质量的请查看此[项目](https://github.com/windfallw/STC8-Airsensor)
 
 ## System Design
@@ -13,9 +15,9 @@
 
  - 从Socket模块的监听到HTTP请求的解析以及HTTP响应头的构造以及Web服务路由表的建立都是自己实现的；
  - 只需在`WebServant`类初始化时指定`static_path`和`template_path`即可在ESP32开机时自动加载相应的文件夹中的HTML CSS JavaScript 文件到路由表；
- 
+
  ***Example Usage of WebServer.py***
- 
+
  ```python
 from py import Webserver
 app = Webserver.WebServant(static_path='/src', template_path='/www')
@@ -27,7 +29,7 @@ app = Webserver.WebServant(static_path='/src', template_path='/www')
 flash/www/index.html ---> http://YourESP32IP/index.html
 flash/src/sb-admin-2.min.css ---> http://YourESP32IP/src/sb-admin-2.min.css
 ```
- 
+
  *Use Decorator to add more route*
 ```python
 #Get方法的argument返回二个参数 client用于发送套接字 address是当前访问服务器的IP
@@ -56,10 +58,10 @@ def machineCtl(*arguments):
 ```
 
  *Attention*
- 
+
  - 目前仅支持GET和POST方法的请求, 响应头仅实现了部分, 如有需求请自行添加；
  - 每次处理web请求后都会调用`gc.collect()`释放内存；
- 
+
  ```python
 print(app.route_table_get) # GET路由表
 print(app.route_table_post) # POST路由表
@@ -71,7 +73,7 @@ _thread.start_new_thread(app.run, ('0.0.0.0', 80)) # 建议使用线程运行
 **2. 第二个线程是串口接收数据并传送到服务器数据库保存**
 
 - 读取STC8发送的的**JSON**格式数据解析后与DHT11采集的温湿度一同打包上传到服务器, 同时本地保留供Web服务调用；
- 
+
 - 因为该部分代码不具有可重用性所以不做过多的介绍;
 
 - - -
@@ -91,7 +93,7 @@ _thread.start_new_thread(app.run, ('0.0.0.0', 80)) # 建议使用线程运行
     tim2.init(period=1000, mode=machine.Timer.PERIODIC,
               callback=lambda t: External_Device.interruptOLED())  # 1秒刷新一次OLED
 ```
- 
+
  - 这些回调函数会将对应设备的中断标志设置为`True`，而此线程则负责扫描中断标志并执行相应的操作
   
    - DHT11的温湿度采集
@@ -123,17 +125,82 @@ def Refresh():
             WiFi.RefreshWiFiList = False
             WiFi.ScanWiFi()
         time.sleep_ms(50)  # 找点事做防止线程卡死循环
-```
+ ```
 
 - WIFI配置及相关系统设置的保存暂时存储在`flash/config.json`下未来可能会尝试使用`btree`数据库实现
 
 ## Web Design
 
- - 网页开发使用的相关技术
-    
+ - 使用到的相关技术
+   
    - 基于*Bootstrap*的*SB-Admin-2*框架
+   
    - 图表的绘制使用*Chart.js*
+   
    - GPS地图使用了[*高德地图API*](https://lbs.amap.com/)
+   
    - 网页图标使用的是阿里的 [*Icon Font*](https://www.iconfont.cn/)
-  
-  更多内容还在添加中 
+
+------
+
+- 交互界面
+
+  - 显示ESP32的设备概况
+    - CPU工作频率
+    - 内存使用情况
+    - 串口接收STC8数据的次数统计
+    - 将数据传输到服务器的次数统计
+    - CPU温度和霍尔传感器
+  - WiFi模块
+    - 当前连接的SSID以及信号显示
+    - 查看Station和AP的相关配置信息
+  - PMS7003
+  - DHT11
+  - GPS地图
+
+![WEB UI](images\web1.png)
+
+------
+
+- 交互设置
+  - 重启ESP32
+  - 连接WiFi
+  - 修改服务器域名
+  - 表格显示了ESP32当前扫描到的周围WiFi
+  - 记录每次后台Ajax的交互
+
+![WEB CONFIG](images\web2.png)
+
+------
+
+- 网页组件
+
+   - `www` ----------> `Flash/www/...`
+
+     - `favicon.ico`
+     
+     - `index.html`
+     
+   - `src` ----------> `Flash/src/...`
+
+   	 - 框架所需要的组件
+        - `sb-admin-2.min.css`
+        - `font.css`
+        - `ubuntuMono.css`
+        - `Chart.min.js`
+        - `bootstrap.bundle.min.js`
+        - `jquery.min.js`
+        - `sb-admin-2.min.js`
+        - `jquery.easing.min.js`
+      
+     - 自己写的JavaScript
+        - `core.js`
+        - `setchart.js`
+        - `setmap.js`
+
+------
+
+- 其它
+
+  - 响应式框架支持各种设备的访问
+  - 
