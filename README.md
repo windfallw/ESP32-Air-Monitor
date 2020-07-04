@@ -3,7 +3,7 @@
 
 - ESP32通过串口接收来自STC8的空气质量数据, 并提供网页服务来供使用者监控当前空气质量
 
-![devices](images\devices.jpg)
+![devices](images/devices.jpg)
 
 - 有关*STC8*如何采集空气质量的请查看此[项目](https://github.com/windfallw/STC8-Airsensor)
 
@@ -158,7 +158,7 @@ def Refresh():
   - DHT11
   - GPS地图
 
-![WEB UI](images\web1.png)
+![WEB UI](images/web1.png)
 
 ------
 
@@ -169,7 +169,7 @@ def Refresh():
   - 表格显示了ESP32当前扫描到的周围WiFi
   - 记录每次后台Ajax的交互
 
-![WEB CONFIG](images\web2.png)
+![WEB CONFIG](images/web2.png)
 
 ------
 
