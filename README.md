@@ -160,8 +160,6 @@ def Refresh():
 
 ![WEB UI](images/web1.png)
 
-------
-
 - 交互设置
   - 重启ESP32
   - 连接WiFi
@@ -193,7 +191,7 @@ def Refresh():
         - `sb-admin-2.min.js`
         - `jquery.easing.min.js`
       
-     - 自己写的JavaScript
+     - JavaScript
         - `core.js`
         - `setchart.js`
         - `setmap.js`
@@ -203,4 +201,4 @@ def Refresh():
 - 其它
 
   - 响应式框架支持各种设备的访问
-  - 
+  - 使用Safari浏览器访问有点小bug之后会修复
