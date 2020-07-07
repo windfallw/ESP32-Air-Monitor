@@ -216,7 +216,7 @@ function getAir() {
         data: {},
         dataType: 'json',
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
-        timeout: 1000,
+        timeout: 5000,
         beforeSend: LoadFunction, //加载执行方法
         error: erryFunction, //错误执行方法
         success: succFunction //成功执行方法
@@ -362,7 +362,7 @@ function getVoc() {
         data: {},
         dataType: 'json',
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
-        timeout: 1000,
+        timeout: 5000,
         beforeSend: LoadFunction, //加载执行方法
         error: erryFunction, //错误执行方法
         success: succFunction //成功执行方法

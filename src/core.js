@@ -73,7 +73,7 @@ function machine(str) {
         data: str,
         dataType: 'text',
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
-        timeout: 1000,
+        timeout: 5000,
         beforeSend: LoadFunction, //加载执行方法
         error: erryFunction, //错误执行方法
         success: succFunction //成功执行方法
@@ -205,7 +205,7 @@ $('form').submit(function (event) {
         url: serverAddress + form.attr('action'),
         data: form.serialize(),
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
-        timeout: 1000,
+        timeout: 5000,
         beforeSend: LoadFunction, //加载执行方法
         error: erryFunction, //错误执行方法
         success: succFunction //成功执行方法
@@ -232,7 +232,7 @@ function getSys() {
         data: {},
         dataType: 'json',
         async: true, //是否为异步请求，ture为异步请求，false为同步请求
-        timeout: 1000,
+        timeout: 5000,
         beforeSend: LoadFunction, //加载执行方法
         error: erryFunction, //错误执行方法
         success: succFunction //成功执行方法
