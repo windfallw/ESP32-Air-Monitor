@@ -1,3 +1,9 @@
+#
+# MIT License(https://github.com/windfallw/ESP32-Air-Monitor/blob/master/LICENSE)
+#
+# Copyright (c) 2020 windfallw
+#
+
 import socket
 import os
 import gc
@@ -12,6 +18,7 @@ Server: ESP32-Webserver
 
 OK200 = '''HTTP/1.0 200 OK
 Content-Type: {0};charset=utf-8
+Cache-Control: no-cache, no-store, must-revalidate
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
 
@@ -19,13 +26,16 @@ Server: ESP32-Webserver
 
 BadRequest400 = '''HTTP/1.0 400 Bad Request
 Content-Type: text/html;charset=utf-8
+Cache-Control: no-cache, no-store, must-revalidate
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
 
+BadRequest400
 '''
 
 NotFound404 = '''HTTP/1.0 404 NOT FOUND
 Content-Type: text/html;charset=utf-8
+Cache-Control: no-cache, no-store, must-revalidate
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
 
@@ -37,9 +47,11 @@ Welcome to->MY GITHUB</a>
 
 MethodNotAllowed405 = '''HTTP/1.0 405 Method Not Allowed
 Content-Type: text/html;charset=utf-8
+Cache-Control: no-cache, no-store, must-revalidate
 Access-Control-Allow-Origin: *
 Server: ESP32-Webserver
 
+MethodNotAllowed405
 '''
 
 data_type = {
@@ -127,16 +139,39 @@ class WebServant:
         """host和port默认为本机ip的80端口"""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.settimeout(2)
         sock.bind((host, port))
         sock.listen(5)
         print("listen on %s." % port)
         while True:
             try:
                 client, address = sock.accept()
-                request_head, request_data = client.recv(1024).decode().split('\r\n', 1)  # 处理http请求头分割成请求部分和数据部分
-                request_method, request_url, request_version = request_head.split(' ', 2)  # 将请求方法 请求路径 http版本分割出来
-                client_data = request_data.rsplit('\r\n', 1)[-1]  # 用户发送的数据
+
+                request_head = client.readline().decode()
+                request_body = ''
+                request_data = ''
+                contentLength = 0
+
+                while True:
+                    line = client.readline().decode()
+                    elements = line.strip().split(':', 1)
+                    if len(elements) == 2:
+                        if elements[0].strip() == 'Content-Length':
+                            contentLength = int(elements[1].strip())
+                    if line == '' or line == "\r\n":
+                        break
+                    request_body += line
+
+                print(address, client)
+                print(request_head + request_body)
+
+                if contentLength:
+                    request_data = client.read(contentLength).decode()
+                    print(request_data)
+
+                request_method, request_url, request_version = request_head.split(' ', 2)  # 请求方法 请求路径 http版本
                 # print(request_url, request_method, address)
+
                 flag = False
                 if request_method.upper() == 'GET':
                     for i in self.route_table_get:
@@ -151,7 +186,7 @@ class WebServant:
                     for i in self.route_table_post:
                         path, func = i
                         if path == request_url:
-                            func(client, address, client_data)
+                            func(client, address, request_data)
                             flag = True
                             break
                     if not flag:
@@ -160,6 +195,7 @@ class WebServant:
                     client.send(MethodNotAllowed405)
                 client.close()
             except Exception as e:
-                print('WebServant:', e)
+                pass
+                # print('WebServant:', e)
             finally:
                 gc.collect()
