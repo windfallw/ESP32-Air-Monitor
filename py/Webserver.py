@@ -162,12 +162,12 @@ class WebServant:
                         break
                     request_body += line
 
-                print(address, client)
-                print(request_head + request_body)
+                # print(address, client)
+                # print(request_head + request_body)
 
                 if contentLength:
                     request_data = client.read(contentLength).decode()
-                    print(request_data)
+                    # print(request_data)
 
                 request_method, request_url, request_version = request_head.split(' ', 2)  # 请求方法 请求路径 http版本
                 # print(request_url, request_method, address)

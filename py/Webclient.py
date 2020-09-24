@@ -3,8 +3,7 @@ import gc
 
 
 class HttpRequest:
-    RequestHeader_template = '''
-{0} {1} HTTP/1.1
+    RequestHeader_template = '''{0} {1} HTTP/1.1
 host: {2}
 Content-Type: application/json
 cache-control: no-cache
